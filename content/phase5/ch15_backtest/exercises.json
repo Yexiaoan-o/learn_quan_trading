@@ -1,0 +1,62 @@
+[
+  {
+    "id": "ch15_ex1",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "在回测中，前视偏差（Look-Ahead Bias）指的是什么？",
+    "options": [
+      "仅使用过去的价格数据来预测未来走势",
+      "在某个时间点使用了该时间点之后才能获得的信息",
+      "回测的起始时间太早，导致数据覆盖的时间范围过长",
+      "回测中只包含了表现较好的股票，排除了退市的股票"
+    ],
+    "answer": 1,
+    "explanation": "前视偏差是指在t时刻使用了t时刻尚未发生的信息（如用未来数据做决策），这会导致回测结果被人为美化。正确做法是确保策略在任何时间点只能使用该时间点以前可获得的信息。"
+  },
+  {
+    "id": "ch15_ex2",
+    "section": "02",
+    "type": "multiple_choice",
+    "question": "以下哪个指标用来衡量每单位下行风险所获得的超额收益？",
+    "options": [
+      "夏普比率（Sharpe Ratio）",
+      "卡玛比率（Calmar Ratio）",
+      "索提诺比率（Sortino Ratio）",
+      "信息比率（Information Ratio）"
+    ],
+    "answer": 2,
+    "explanation": "索提诺比率只用下行波动率（负收益率的标准差）作为风险度量，更符合投资者只关心下跌风险的心理。夏普比率使用总波动率，包括上涨和下跌的波动。"
+  },
+  {
+    "id": "ch15_ex3",
+    "section": "02",
+    "type": "true_false",
+    "question": "盈利因子（Profit Factor）大于1.5的策略一定是好策略，可以放心投入实盘。",
+    "answer": false,
+    "explanation": "盈利因子只是衡量策略质量的一个维度。即使盈利因子大于1.5，也可能存在过拟合、最大回撤过大、样本外表现差等问题。需要综合多个指标（夏普比率、最大回撤、胜率等）来评估策略。"
+  },
+  {
+    "id": "ch15_ex4",
+    "section": "03",
+    "type": "code_fill",
+    "question": "在向量化回测中，以下代码缺少了防止前视偏差的关键操作。请补全缺失的代码（使用pandas）：\n\n```python\ndef run_backtest(prices, signals):\n    daily_returns = prices.pct_change()\n    # 需要在这里补全代码，防止前视偏差\n    strategy_returns = ? * daily_returns\n    return (1 + strategy_returns).cumprod()\n```",
+    "answer": "signals.shift(1)",
+    "explanation": "使用shift(1)将信号向后移动一个时间单位，确保t时刻的策略决策基于t-1时刻（或更早）的信息，从而避免前视偏差。这样今天的收益率应用的是昨天计算出的信号。"
+  },
+  {
+    "id": "ch15_ex5",
+    "section": "04",
+    "type": "true_false",
+    "question": "事件驱动回测比向量化回测速度更快，因此更适合策略的快速初筛。",
+    "answer": false,
+    "explanation": "恰恰相反。事件驱动回测由于需要逐条处理事件循环，速度远慢于向量化回测。向量化回测利用pandas的批量运算，速度更快，更适合策略的快速初筛。事件驱动回测的优势在于更高的仿真度和更灵活的建模能力。"
+  },
+  {
+    "id": "ch15_ex6",
+    "section": "04",
+    "type": "programming",
+    "question": "请编写一个简单的Python函数来计算最大回撤（Maximum Drawdown）。\n\n要求：\n1. 输入为净值序列（list或pd.Series）\n2. 返回最大回撤的比例（如-0.25表示最大回撤25%）\n3. 同时返回最大回撤的开始和结束日期（如果有日期索引）\n\n示例输入：net_values = [100, 105, 102, 98, 103, 110, 95, 100]\n示例输出：最大回撤约为-0.136（从110到95的回撤）",
+    "answer": "def max_drawdown(net_values):\n    import pandas as pd\n    if not isinstance(net_values, pd.Series):\n        net_values = pd.Series(net_values)\n    rolling_max = net_values.expanding().max()\n    drawdowns = (net_values - rolling_max) / rolling_max\n    max_dd = drawdowns.min()\n    end_idx = drawdowns.idxmin()\n    start_idx = net_values[:end_idx].idxmax() if isinstance(net_values.index, pd.DatetimeIndex) else None\n    return max_dd, start_idx, end_idx",
+    "explanation": "最大回撤的计算分两步：1) 计算每个时间点的滚动历史最大值（expanding().max()）；2) 计算当前净值与滚动最大值的差值比例。最小值为最大回撤。"
+  }
+]

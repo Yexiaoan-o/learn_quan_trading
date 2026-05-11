@@ -1,0 +1,62 @@
+[
+  {
+    "id": "ch11_ex1",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "以下哪个因子属于价值因子（Value Factor）？",
+    "options": [
+      "过去12个月的价格动量",
+      "市盈率（PE Ratio）",
+      "净资产收益率（ROE）",
+      "60日历史波动率"
+    ],
+    "answer": 1,
+    "explanation": "市盈率（PE）衡量股票价格相对于每股收益的高低，是价值因子的典型代表。动量属于动量因子，ROE属于质量因子，波动率属于波动率因子。"
+  },
+  {
+    "id": "ch11_ex2",
+    "section": "02",
+    "type": "true_false",
+    "question": "在因子IC分析中，ICIR（IC信息比率）比单纯的IC均值更重要，因为它能衡量IC的稳定性。",
+    "answer": true,
+    "explanation": "ICIR = mean(IC) / std(IC)，它同时考虑了IC的均值和波动。一个IC均值不高但非常稳定的因子，比IC均值高但波动巨大的因子更适合系统化执行。ICIR > 0.5通常被认为是优秀因子。"
+  },
+  {
+    "id": "ch11_ex3",
+    "section": "02",
+    "type": "code_fill",
+    "question": "补全代码：使用scipy计算因子值factor_values与未来收益率forward_returns之间的Rank IC。",
+    "answer": "from scipy.stats import spearmanr\n\nvalid = ~(np.isnan(factor_values) | np.isnan(forward_returns))\nic, p_value = spearmanr(factor_values[valid], forward_returns[valid])\nprint(f\"Rank IC: {ic:.4f}, p-value: {p_value:.4f}\")",
+    "explanation": "使用spearmanr函数计算Spearman秩相关系数作为Rank IC。需要先过滤掉NaN值，返回的ic即为Rank IC，p_value为统计显著性。"
+  },
+  {
+    "id": "ch11_ex4",
+    "section": "04",
+    "type": "programming",
+    "question": "在DolphinDB中编写SQL，使用ta模块计算MACD指标，并结合gtja191Alpha模块计算Alpha001因子。",
+    "answer": "use ta\nuse gtja191Alpha\n\nselect\n    symbol,\n    date,\n    close,\n    ta::macd(close, 12, 26, 9) as MACD,\n    ta::diff(close, 12, 26) as DIF,\n    ta::dea(close, 12, 26, 9) as DEA,\n    gtja191Alpha::alpha001(open, high, low, close, volume, amount, vwap, cap, returns) as alpha_001\nfrom daily_data\ncontext by symbol",
+    "explanation": "使用use语句加载ta和gtja191Alpha模块，然后在select中调用各模块的函数。context by symbol确保按股票分组计算。"
+  },
+  {
+    "id": "ch11_ex5",
+    "section": "03",
+    "type": "multiple_choice",
+    "question": "Fama-MacBeth回归的两步分别做什么？",
+    "options": [
+      "第一步做横截面回归，第二步做时间序列回归",
+      "第一步做时间序列回归得到Beta暴露，第二步做横截面回归估计因子风险溢价",
+      "两步都做时间序列回归",
+      "第一步估计因子收益率，第二步估计因子方差"
+    ],
+    "answer": 1,
+    "explanation": "Fama-MacBeth回归分两步：第一步对每只股票做时间序列回归，得到该股票在各因子上的Beta暴露；第二步在每个横截面上回归，用Beta解释当期的横截面收益差异，得到各因子的风险溢价λ。"
+  },
+  {
+    "id": "ch11_ex6",
+    "section": "03",
+    "type": "true_false",
+    "question": "在多因子模型中，应该把所有能找到的因子都加进去，因子越多模型预测越准。",
+    "answer": false,
+    "explanation": "错误的做法。因子过多会引入噪声和共线性问题。两个高度相关的因子（如PE和PB）不会带来额外信息，反而可能降低模型稳定性。应该选择IC显著且彼此低相关的因子（相关系数<0.7）。"
+  }
+]

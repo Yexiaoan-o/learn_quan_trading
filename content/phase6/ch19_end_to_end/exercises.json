@@ -1,0 +1,55 @@
+[
+  {
+    "id": "ch19_ex01",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "在本章的端到端项目中，策略架构使用Python和DolphinDB的分工原则是什么？",
+    "options": ["A. Python负责信号生成，DolphinDB负责可视化", "B. Python负责探索和可视化，DolphinDB负责大规模计算和生产级回测", "C. 所有逻辑都用Python实现", "D. 所有逻辑都用DolphinDB实现"],
+    "answer": 1,
+    "explanation": "Python用于快速验证、探索分析和结果可视化；DolphinDB用于高性能的大规模数据存储、因子计算和生产级回测。两者通过DolphinDB Python API实现无缝协作。"
+  },
+  {
+    "id": "ch19_ex02",
+    "section": "02",
+    "type": "code_fill",
+    "question": "在数据准备阶段，使用pandas的前向填充方法填充缺失交易日的代码是？",
+    "code_template": "import pandas as pd\n# df_clean = df_clean.reindex(full_idx)\ndf_clean.fillna(method='______', inplace=True)",
+    "answer": "ffill",
+    "explanation": "fillna(method='ffill') 是pandas中的前向填充方法，用上一个有效值填充当前缺失值。在金融数据中，非交易日通常使用前一日数据填充（如前一日收盘价保持不变）。"
+  },
+  {
+    "id": "ch19_ex03",
+    "section": "03",
+    "type": "code_fill",
+    "question": "在双均线策略中，为避免使用未来信息，持仓信号应该滞后信号一期。填入正确的shift操作：",
+    "code_template": "df['signal'] = (df['ma20'] > df['ma60']).astype(int)\ndf['position'] = df['signal'].______(1).fillna(0)",
+    "answer": "shift",
+    "explanation": "df['signal'].shift(1) 将信号向后移动一期。这样在t日收盘后才能确定的信号，在t+1日才用于开仓决策，避免了'在t日知道t日收盘价后立即开仓'这种现实中不可能发生的情况。"
+  },
+  {
+    "id": "ch19_ex04",
+    "section": "03",
+    "type": "true_false",
+    "question": "ATR仓位管理的核心思想是：无论市场波动大小，始终保持相同的持仓数量。",
+    "options": ["正确", "错误"],
+    "answer": 1,
+    "explanation": "错误。ATR仓位管理的核心思想恰恰相反：持股数量 = 最大可接受亏损 / ATR距离，因此当市场波动大（ATR高）时持仓应减少，波动小（ATR低）时持仓可增加，以控制单笔交易的风险上限恒定。"
+  },
+  {
+    "id": "ch19_ex05",
+    "section": "04",
+    "type": "code_fill",
+    "question": "在回测中计算夏普比率时，需要将日收益率为0的均值年化。填入正确的年化系数：",
+    "code_template": "daily_ret = df['strategy_return']\nsharpe = daily_ret.mean() / daily_ret.std() * np.sqrt(____)",
+    "answer": "252",
+    "explanation": "中国A股市场每年大约有252个交易日（365天减去周末和节假日），因此将日收益率年化时乘以√252。日收益率标准差之所以乘以√252，是基于独立同分布假设下波动率的时间平方根法则。"
+  },
+  {
+    "id": "ch19_ex06",
+    "section": "04",
+    "type": "programming",
+    "question": "编写一个简单的回测函数 simple_backtest，接受每日收盘价序列（prices列表）、信号序列（signals列表，1=持有，0=空仓）、初始资金（initial_capital），返回最终总资产。要求：1) 每日收益率=当日涨跌幅×前一日仓位；2) 考虑双边万分之三的手续费（只在开仓或平仓时收取）；3) 净值按复利计算。",
+    "answer": "def simple_backtest(prices, signals, initial_capital=100000):\n    commission_rate = 0.0003\n    equity = initial_capital\n    shares = 0\n    position_open = False\n    \n    for i in range(len(prices) - 1):\n        if signals[i] == 1 and not position_open:\n            shares = equity * (1 - commission_rate) / prices[i]\n            equity = 0\n            position_open = True\n        elif signals[i] == 0 and position_open:\n            equity = shares * prices[i] * (1 - commission_rate)\n            shares = 0\n            position_open = False\n        elif position_open:\n            equity = shares * prices[i]\n    \n    if position_open:\n        equity = shares * prices[-1]\n    return round(equity, 2)",
+    "explanation": "这个简化回测逻辑的核心要素：1) 信号t日生成，t+1日执行；2) 开仓时扣除买入手续费，平仓时扣除卖出手续费；3) 持仓期间净值随价格波动。更完整的实现还应考虑滑点、印花税等成本。"
+  }
+]

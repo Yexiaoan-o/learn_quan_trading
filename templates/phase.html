@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ phase.phase_title }} - 量化交易学习平台{% endblock %}
+
+{% block content %}
+<div class="phase-page">
+    <div class="breadcrumb">
+        <a href="/">首页</a> <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">{{ phase.phase_title }}</span>
+    </div>
+
+    <div class="phase-detail-header">
+        <h1>{{ phase.phase_title }}</h1>
+        <p class="phase-detail-desc">{{ phase.phase_desc }}</p>
+    </div>
+
+    <div class="phase-chapter-grid">
+        {% for ch in phase.chapters %}
+        <a href="/chapter/{{ ch.id }}" class="phase-chapter-card">
+            <div class="pcc-number">{{ ch.order }}</div>
+            <div class="pcc-info">
+                <h3>{{ ch.title }}</h3>
+                <span class="pcc-meta">{{ ch.sections|length }} 节 · {{ ch.total_exercises }} 道习题</span>
+            </div>
+            <div class="pcc-arrow">&#x279C;</div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

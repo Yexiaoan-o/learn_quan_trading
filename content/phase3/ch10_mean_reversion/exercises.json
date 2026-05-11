@@ -1,0 +1,54 @@
+[
+  {
+    "id": "ch10_ex1",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "关于均值回归的统计学基础，以下哪项说法是正确的？",
+    "options": [
+      "股票价格序列通常是平稳的，可以直接用于均值回归策略",
+      "大多数价格序列是非平稳的，但其线性组合（如配对交易的价差）可能是平稳的",
+      "只要两只股票价格相关系数高，就一定能做配对交易",
+      "均值回归策略在趋势市场中表现最好"
+    ],
+    "answer": 1,
+    "explanation": "绝大多数价格序列非平稳（有趋势），但价差或价格组合可能是平稳的。配对交易的关键是协整关系，而非简单的相关性。均值回归策略在震荡市中表现更好，在强趋势市场中容易亏损。"
+  },
+  {
+    "id": "ch10_ex2",
+    "section": "02",
+    "type": "true_false",
+    "question": "布林带挤压（Squeeze）是指带宽收窄至历史低位，通常预示大行情即将爆发。",
+    "answer": true,
+    "explanation": "当布林带宽度（BandWidth）压缩到历史低位时，说明市场波动率极低、价格在狭窄区间内整理。这种'暴风雨前的宁静'往往预示着剧烈的方向性突破即将发生。"
+  },
+  {
+    "id": "ch10_ex3",
+    "section": "02",
+    "type": "code_fill",
+    "question": "补全代码：在Python中计算布林带的%b指标（价格在布林带中的相对位置）。",
+    "answer": "df['bb_middle'] = df['close'].rolling(20).mean()\ndf['bb_std'] = df['close'].rolling(20).std()\ndf['bb_upper'] = df['bb_middle'] + 2 * df['bb_std']\ndf['bb_lower'] = df['bb_middle'] - 2 * df['bb_std']\ndf['bb_pct_b'] = (df['close'] - df['bb_lower']) / (df['bb_upper'] - df['bb_lower'])",
+    "explanation": "%b = (price - lower) / (upper - lower)。当%b > 1时价格突破上轨，%b < 0时价格跌破下轨，%b = 0.5时价格恰在中轨。"
+  },
+  {
+    "id": "ch10_ex4",
+    "section": "04",
+    "type": "programming",
+    "question": "在DolphinDB中，写出SQL语句：在daily_data表中按symbol分组计算20日布林带上轨、下轨及Z-score，并筛选出Z-score绝对值大于2的信号。",
+    "answer": "select\n    symbol,\n    date,\n    close,\n    mavg(close, 20) as bb_mid,\n    mavg(close, 20) + 2 * mstd(close, 20) as bb_upper,\n    mavg(close, 20) - 2 * mstd(close, 20) as bb_lower,\n    (close - mavg(close, 20)) / mstd(close, 20) as zscore\nfrom daily_data\ncontext by symbol\nhaving abs((close - mavg(close, 20)) / mstd(close, 20)) > 2",
+    "explanation": "使用mavg和mstd分别计算移动均值和标准差，用context by按股票分组保证各组独立计算，having子句筛选满足条件的行。"
+  },
+  {
+    "id": "ch10_ex5",
+    "section": "03",
+    "type": "multiple_choice",
+    "question": "在配对交易中，对冲比率（Hedge Ratio）的作用是什么？",
+    "options": [
+      "决定每次买入多少股票",
+      "决定两只股票的持仓数量比例，使组合市值中性",
+      "决定何时平仓",
+      "作为止损线"
+    ],
+    "answer": 1,
+    "explanation": "对冲比率通过回归计算得出（Y = α + βX，β即对冲比率），它确定了两只股票的资金配比，使组合在开仓时达到市值中性：多头A的金额 = β × 空头B的金额。这样组合对整体市场的波动不敏感，只暴露于两只股票的相对价差变化。"
+  }
+]

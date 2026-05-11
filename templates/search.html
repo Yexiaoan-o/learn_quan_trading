@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}搜索 - 量化交易学习平台{% endblock %}
+
+{% block content %}
+<div class="search-page">
+    <h1>&#x1F50D; 搜索课程内容</h1>
+
+    <div class="search-hero">
+        <form action="/search" method="get" class="search-hero-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="输入关键词搜索所有课程内容...">
+            <button type="submit" class="btn btn-primary">搜索</button>
+        </form>
+    </div>
+
+    {% if query %}
+    <div class="search-results">
+        {% if results %}
+        <div class="search-count">找到 {{ results|length }} 个结果</div>
+        {% for r in results %}
+        <div class="search-result-item">
+            <div class="sr-breadcrumb">{{ r.phase_title }} / {{ r.chapter_title }}</div>
+            <a href="/chapter/{{ r.chapter_id }}" class="sr-title">{{ r.section_title }}</a>
+            <div class="sr-snippet">{{ r.snippet }}</div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">&#x1F50D;</div>
+            <p>没有找到与 "{{ query }}" 相关的内容</p>
+            <p class="empty-hint">请尝试其他关键词</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ch01_ex1",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "量化交易的核心特征不包括以下哪一项？",
+    "options": [
+      "A. 数据驱动决策",
+      "B. 依赖交易员的主观直觉",
+      "C. 模型化交易逻辑",
+      "D. 系统化执行"
+    ],
+    "answer": 1,
+    "explanation": "量化交易的核心特征包括数据驱动、模型化和系统化，而不是依赖主观直觉。主观交易依赖交易员的经验和直觉来做出判断，而量化交易恰恰是将决策过程标准化以消除主观偏差。"
+  },
+  {
+    "id": "ch01_ex2",
+    "section": "02",
+    "type": "true_false",
+    "question": "在回测中，如果忽略交易成本（佣金、滑点、冲击成本），回测结果通常会高估策略的实际表现。",
+    "answer": true,
+    "explanation": "交易成本是实盘交易中不可避免的支出。如果回测时不考虑佣金、滑点和市场冲击成本，策略的实际收益会被严重高估。这被称为'回测偏差'，是量化交易中常见的陷阱。很多在回测中表现优异的策略，一旦加上合理的交易成本估算，收益可能变为负值。"
+  },
+  {
+    "id": "ch01_ex3",
+    "section": "03",
+    "type": "multiple_choice",
+    "question": "以下哪种量化策略的核心逻辑是'顺势而为'，不预测市场方向，而是跟随已经形成的趋势？",
+    "options": [
+      "A. 均值回归策略",
+      "B. 统计套利策略",
+      "C. 趋势跟踪策略",
+      "D. 做市商策略"
+    ],
+    "answer": 2,
+    "explanation": "趋势跟踪策略（Trend Following）的核心理念是跟随市场已形成的趋势进行交易，不试图预测趋势的起点和终点。经典趋势跟踪策略包括双均线交叉、唐奇安通道突破等方法。与之相反，均值回归策略认为价格会回到均值附近。"
+  },
+  {
+    "id": "ch01_ex4",
+    "section": "04",
+    "type": "code_fill",
+    "question": "补全以下 Python 代码，使用 NumPy 计算策略的年化夏普比率（假设无风险利率为 3%）：\n\n```python\nimport numpy as np\n\ndef annualized_sharpe(daily_returns):\n    mean_return = np.mean(daily_returns)\n    std_return = np.std(daily_returns)\n    sharpe = ______\n    return sharpe\n```",
+    "answer": "(mean_return * 252 - 0.03) / (std_return * np.sqrt(252))",
+    "explanation": "年化夏普比率的计算公式为：(年化收益率 - 无风险利率) / 年化波动率。其中年化收益率 = 日收益率均值 × 252（交易日数），年化波动率 = 日收益率标准差 × √252。正确的代码为：(mean_return * 252 - 0.03) / (std_return * np.sqrt(252))。"
+  },
+  {
+    "id": "ch01_ex5",
+    "section": "02",
+    "type": "multiple_choice",
+    "question": "在量化交易工作流程中，以下哪个阶段需要使用最大回撤和夏普比率等指标来评估策略？",
+    "options": [
+      "A. 数据获取",
+      "B. 策略研发",
+      "C. 回测验证",
+      "D. 绩效监控"
+    ],
+    "answer": 2,
+    "explanation": "回测验证阶段需要计算夏普比率、最大回撤、卡玛比率等核心绩效指标，来系统性地评估策略在历史数据上的表现。这些指标帮助我们判断策略是否具有统计显著性，以及是否值得投入实盘交易。"
+  },
+  {
+    "id": "ch01_ex6",
+    "section": "04",
+    "type": "programming",
+    "question": "编写一个 Python 函数 `calculate_calmar_ratio`，计算策略的卡玛比率。参数为 `daily_returns`（日收益率序列，numpy array），返回卡玛比率（浮点数）。卡玛比率 = 年化收益率 / |最大回撤|。年化收益率使用单利方式：日均收益 × 252。",
+    "answer": "import numpy as np\n\ndef calculate_calmar_ratio(daily_returns):\n    mean_return = np.mean(daily_returns)\n    annual_return = mean_return * 252\n    cum_returns = np.cumprod(1 + daily_returns)\n    running_max = np.maximum.accumulate(cum_returns)\n    drawdown = (cum_returns - running_max) / running_max\n    max_drawdown = np.min(drawdown)\n    if max_drawdown == 0:\n        return 0\n    calmar = annual_return / abs(max_drawdown)\n    return calmar",
+    "explanation": "卡玛比率（Calmar Ratio）衡量单位最大回撤带来的年化收益。计算步骤：(1) 计算日均收益 × 252 得到年化收益；(2) 计算累计收益曲线；(3) 计算滚动最大回撤 = (当前净值 - 历史最高净值) / 历史最高净值；(4) 取最大回撤的绝对值；(5) 卡玛比率 = 年化收益 / |最大回撤|。卡玛比率越高，说明策略的风险收益比越好。"
+  }
+]

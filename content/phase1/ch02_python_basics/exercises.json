@@ -1,0 +1,54 @@
+[
+  {
+    "id": "ch02_ex1",
+    "section": "01",
+    "type": "code_fill",
+    "question": "补全以下代码，使用 NumPy 计算给定每日收益率序列的年化波动率：\n\n```python\nimport numpy as np\n\ndef annualized_volatility(daily_returns):\n    std_daily = np.std(daily_returns)\n    annual_vol = ______\n    return annual_vol\n```",
+    "answer": "std_daily * np.sqrt(252)",
+    "explanation": "年化波动率 = 日收益率标准差 × √252。其中 252 是美国市场一年的平均交易日数（中国市场约为 244 天）。这是将日频风险度量转换为年频度量的标准方法。注意其他频率的换算：周频 × √52，月频 × √12。"
+  },
+  {
+    "id": "ch02_ex2",
+    "section": "02",
+    "type": "multiple_choice",
+    "question": "使用 Pandas 处理 OHLCV 数据时，要将日频数据降采样为月频数据并计算月收益率，以下关于 resample 方法的使用哪个是正确的？",
+    "options": [
+      "A. df['close'].resample('M').mean()",
+      "B. df['close'].resample('M').last().pct_change()",
+      "C. df['close'].resample('M').sum()",
+      "D. df['close'].resample('M').std()"
+    ],
+    "answer": 1,
+    "explanation": "月频收盘价应该使用 last() 取每月最后一个交易日的收盘价，然后使用 pct_change() 计算月度收益率。使用 mean() 得到的是月内平均价格，不是收盘价；sum() 是价格的加总，没有金融意义；std() 得到的是波动率而非收益。降采样时每个字段需要用正确的聚合方法：open→first, high→max, low→min, close→last, volume→sum。"
+  },
+  {
+    "id": "ch02_ex3",
+    "section": "03",
+    "type": "true_false",
+    "question": "在计算股票的移动平均线时，使用 `df['close'].rolling(20).mean()` 得到的结果，前19个值为 NaN，这是正常的现象。",
+    "answer": true,
+    "explanation": "正确。rolling(20) 需要至少 20 个数据点才能计算平均值，因此前 19 行的结果必然为 NaN。这是正确且符合预期的行为。如果需要填充这些 NaN 值，可以使用 min_periods 参数降低最小窗口要求（如 rolling(20, min_periods=1)），但这会使前期的均线不准确。"
+  },
+  {
+    "id": "ch02_ex4",
+    "section": "04",
+    "type": "multiple_choice",
+    "question": "在计算策略回测的最大回撤时，以下哪个 NumPy/Pandas 函数组合是正确的核心步骤？",
+    "options": [
+      "A. np.cumsum → np.max → np.min",
+      "B. np.cumprod → np.maximum.accumulate → 计算偏离度 → np.min",
+      "C. np.diff → np.abs → np.max",
+      "D. np.mean → np.std → np.min"
+    ],
+    "answer": 1,
+    "explanation": "最大回撤的正确计算步骤：(1) np.cumprod 计算累计净值；(2) np.maximum.accumulate 获取滚动的历史最高净值；(3) 计算当前净值与历史最高净值的偏离度 = (当前-最高)/最高；(4) np.min 取所有偏离度中的最小值即为最大回撤。选项A缺少了累积乘积，选项C计算的是价格振幅，选项D是均值和标准差毫无关系。"
+  },
+  {
+    "id": "ch02_ex5",
+    "section": "02",
+    "type": "programming",
+    "question": "编写一个 Python 函数 `clean_ohlcv`，接收一个包含 OHLCV 数据的 DataFrame（含 'open', 'high', 'low', 'close', 'volume' 列），完成以下清洗工作：(1) 将所有 NaN 值用前向填充 (ffill) 处理；(2) 将价格为 0 或负数的行替换为 NaN 后同样前向填充；(3) 确保 high >= max(open, close) 且 low <= min(open, close)，不符合的用前后相邻有效值修正；(4) 返回清洗后的 DataFrame。",
+    "answer": "import pandas as pd\nimport numpy as np\n\ndef clean_ohlcv(df):\n    df = df.copy()\n    \n    for col in ['open', 'high', 'low', 'close']:\n        df.loc[df[col] <= 0, col] = np.nan\n    df = df.fillna(method='ffill')\n    \n    for idx in df.index:\n        true_high = max(df.loc[idx, 'open'], df.loc[idx, 'close'])\n        true_low = min(df.loc[idx, 'open'], df.loc[idx, 'close'])\n        if df.loc[idx, 'high'] < true_high:\n            df.loc[idx, 'high'] = true_high\n        if df.loc[idx, 'low'] > true_low:\n            df.loc[idx, 'low'] = true_low\n    \n    df['volume'] = df['volume'].fillna(0)\n    df.loc[df['volume'] < 0, 'volume'] = 0\n    \n    return df",
+    "explanation": "OHLCV 数据清洗是量化交易的基础工作：(1) 价格列不能为0或负数，否则会破坏收益率计算；(2) high 必须 >= max(open, close)，low 必须 <= min(open, close)，否则K线形态无意义；(3) 成交量不能为负；(4) 前向填充是金融时序数据最合理的缺失值处理方法。数据清洗质量直接影响回测结果的可靠性，很多策略失败的根本原因是数据质量而非策略逻辑。"
+  }
+]

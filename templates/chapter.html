@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}{{ chapter.title }} - 量化交易学习平台{% endblock %}
+
+{% block head %}
+<style>
+.section-tab { display: none; }
+.section-tab.active { display: block; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chapter-page">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/">首页</a> <span class="breadcrumb-sep">/</span>
+        <span>{{ phase.phase_title }}</span> <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">{{ chapter.title }}</span>
+    </div>
+
+    <!-- Chapter Header -->
+    <div class="chapter-header">
+        <h1>{{ chapter.title }}</h1>
+        <div class="chapter-meta">
+            <span class="meta-item">&#x1F4C4; {{ sections|length }} 节</span>
+            <span class="meta-item">&#x270D;&#xFE0F; {{ exercises|length }} 道习题</span>
+        </div>
+
+        {% if exercises %}
+        <a href="/exercise/{{ chapter.id }}" class="btn btn-primary exercise-btn">
+            &#x1F4DD; 进入习题练习
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Section Tabs -->
+    <div class="section-tabs">
+        {% for s in sections %}
+        <button class="section-tab-btn {% if loop.first %}active{% endif %}" onclick="switchSection({{ loop.index0 }})" id="tab-btn-{{ loop.index0 }}">
+            <span class="tab-status">
+                {% if s.completed %}&#x2705;{% else %}&#x26AA;{% endif %}
+            </span>
+            <span class="tab-title">{{ s.title }}</span>
+            {% if s.exercise_count > 0 %}
+            <span class="tab-ex-badge">{{ s.exercise_count }}</span>
+            {% endif %}
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- Section Content -->
+    <div class="section-content-area">
+        {% for s in sections %}
+        <div class="section-tab {% if loop.first %}active{% endif %}" id="tab-{{ loop.index0 }}">
+            <div class="section-body markdown-body">
+                {{ s.content | safe }}
+            </div>
+            <div class="section-actions">
+                <button class="btn btn-sm btn-outline bookmark-btn" data-chapter="{{ chapter.id }}" data-section="{{ s.filename }}" onclick="toggleBookmark(this)" title="书签">
+                    &#x1F516; <span class="bm-text">{% if s.bookmarked %}已收藏{% else %}收藏{% endif %}</span>
+                </button>
+                <button class="btn btn-sm {% if s.completed %}btn-success{% else %}btn-outline{% endif %}" onclick="markComplete('{{ chapter.id }}', '{{ s.filename }}', this)">
+                    {% if s.completed %}&#x2705; 已完成{% else %}&#x2611;&#xFE0F; 标记完成{% endif %}
+                </button>
+            </div>
+
+            <!-- Note -->
+            <div class="note-section">
+                <textarea class="note-input" placeholder="在这里记录学习笔记..." id="note-{{ loop.index0 }}"></textarea>
+                <button class="btn btn-sm btn-primary" onclick="saveNote('{{ chapter.id }}', '{{ s.filename }}', {{ loop.index0 }})">保存笔记</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Prev / Next Navigation -->
+    <div class="chapter-nav">
+        {% if prev_id %}
+        <a href="/chapter/{{ prev_id }}" class="nav-link nav-prev">&#x2190; 上一章</a>
+        {% else %}
+        <span class="nav-link nav-placeholder"></span>
+        {% endif %}
+        {% if next_id %}
+        <a href="/chapter/{{ next_id }}" class="nav-link nav-next">下一章 &#x2192;</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function switchSection(idx) {
+    document.querySelectorAll('.section-tab').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.section-tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById('tab-' + idx).classList.add('active');
+    document.getElementById('tab-btn-' + idx).classList.add('active');
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+async function markComplete(chapterId, sectionId, btn) {
+    const completed = btn.classList.contains('btn-success');
+    const newState = !completed;
+    await fetch(`/api/progress/${chapterId}/${sectionId}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({completed: newState})
+    });
+    if (newState) {
+        btn.classList.remove('btn-outline');
+        btn.classList.add('btn-success');
+        btn.innerHTML = '&#x2705; 已完成';
+        const tabBtn = document.querySelector(`[onclick*="switchSection"]:has(+ *)`);
+    } else {
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-outline');
+        btn.innerHTML = '&#x2611;&#xFE0F; 标记完成';
+    }
+}
+
+async function toggleBookmark(btn) {
+    const chapterId = btn.dataset.chapter;
+    const sectionId = btn.dataset.section;
+    const resp = await fetch(`/api/bookmark/${chapterId}/${sectionId}`, {method: 'POST'});
+    const data = await resp.json();
+    const txt = btn.querySelector('.bm-text');
+    if (data.action === 'added') {
+        txt.textContent = '已收藏';
+    } else {
+        txt.textContent = '收藏';
+    }
+}
+
+async function saveNote(chapterId, sectionId, tabIdx) {
+    const content = document.getElementById('note-' + tabIdx).value.trim();
+    if (!content) return;
+    await fetch('/api/notes', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({chapter_id: chapterId, section_id: sectionId, content: content})
+    });
+    document.getElementById('note-' + tabIdx).value = '';
+    alert('笔记已保存！');
+}
+
+// Learning time tracking
+let startTime = Date.now();
+setInterval(() => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    if (elapsed > 0 && elapsed % 60 === 0) {
+        fetch('/api/learning-time/{{ chapter.id }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({seconds: 60})
+        });
+    }
+}, 60000);
+</script>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}学习仪表盘 - 量化交易学习平台{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="welcome-section">
+        <h1>欢迎来到量化交易学习平台</h1>
+        <p class="welcome-desc">从零开始，系统学习量化交易与 DolphinDB 数据库，掌握金融数据分析的核心技能。</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">&#x1F4DA;</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.completed_sections }}</div>
+                <div class="stat-label">已完成章节</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">&#x270D;&#xFE0F;</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.total_exercises_attempted }}</div>
+                <div class="stat-label">已做习题</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">&#x1F3AF;</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.accuracy }}%</div>
+                <div class="stat-label">正确率</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">&#x23F1;&#xFE0F;</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.total_learning_minutes }}</div>
+                <div class="stat-label">学习分钟</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    {% if last_pos %}
+    <div class="continue-section">
+        <h2>&#x1F517; 继续学习</h2>
+        <a href="/chapter/{{ last_pos.chapter_id }}" class="continue-card">
+            <div class="continue-icon">&#x1F4D6;</div>
+            <div class="continue-info">
+                <div class="continue-label">上次阅读位置</div>
+                <div class="continue-chapter-title">
+                    {% for phase in phases %}
+                        {% for ch in phase.chapters %}
+                            {% if ch.id == last_pos.chapter_id %}
+                                {{ ch.title }}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="continue-arrow">&#x279C;</div>
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Bookmarks -->
+    {% if bookmarks %}
+    <div class="bookmarks-section">
+        <h2>&#x1F516; 我的书签</h2>
+        <div class="bookmark-list">
+            {% for bm in bookmarks %}
+            <a href="/chapter/{{ bm.chapter_id }}" class="bookmark-item">
+                <span class="bookmark-icon">&#x1F516;</span>
+                <span class="bookmark-text">
+                    {% for phase in phases %}
+                        {% for ch in phase.chapters %}
+                            {% if ch.id == bm.chapter_id %}
+                                {{ ch.title }}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Course Overview -->
+    <div class="course-overview">
+        <h2>&#x1F4D1; 课程总览</h2>
+        <div class="phase-grid">
+            {% for phase in phases %}
+            <div class="phase-card">
+                <div class="phase-card-header">
+                    <h3>{{ phase.phase_title }}</h3>
+                    <span class="phase-desc">{{ phase.phase_desc }}</span>
+                </div>
+                <div class="phase-card-chapters">
+                    {% for ch in phase.chapters %}
+                    <a href="/chapter/{{ ch.id }}" class="phase-chapter-link">
+                        <span class="chapter-num">{{ ch.order }}</span>
+                        <span class="chapter-name">{{ ch.title }}</span>
+                        <span class="chapter-arrow">&#x279C;</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

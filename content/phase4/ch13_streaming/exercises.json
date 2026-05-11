@@ -1,0 +1,54 @@
+[
+  {
+    "id": "ch13_ex1",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "在DolphinDB的发布-订阅模型中，以下哪个组件负责将数据写入流表？",
+    "options": [
+      "订阅者（Subscriber）",
+      "流数据引擎（Stream Engine）",
+      "发布者（Publisher）",
+      "输出表"
+    ],
+    "answer": 2,
+    "explanation": "发布者（Publisher）负责将数据写入流表。订阅者（Subscriber）通过subscribeTable监听流表的数据变化并处理。流数据引擎是订阅者的一种特殊形式。"
+  },
+  {
+    "id": "ch13_ex2",
+    "section": "02",
+    "type": "true_false",
+    "question": "时间序列引擎（createTimeSeriesEngine）和响应式状态引擎（createReactiveStateEngine）都需要指定dummyTable参数来推断输出schema。",
+    "answer": true,
+    "explanation": "两个引擎都需要dummyTable参数。dummyTable是一张与输入流表结构相同的空表，用于引擎初始化时推断metrics的输出列类型和名称。schema不匹配会导致引擎初始化失败。"
+  },
+  {
+    "id": "ch13_ex3",
+    "section": "02",
+    "type": "code_fill",
+    "question": "补全代码：创建一个时间序列引擎，计算每只股票5分钟K线（开盘价、最高价、最低价、收盘价）。",
+    "answer": "klineEngine = createTimeSeriesEngine(\n    name=\"kline_5m\",\n    windowSize=300,\n    step=300,\n    metrics=[\n        <first(price)>,\n        <max(price)>,\n        <min(price)>,\n        <last(price)>\n    ],\n    dummyTable=tickStream,\n    outputTable=klineOutput,\n    timeColumn=`timestamp,\n    keyColumn=`symbol\n)",
+    "explanation": "windowSize=300表示5分钟（300秒）的时间窗口，step=300表示每300秒输出一次。metrics使用first/max/min/last分别获取开盘价、最高价、最低价、收盘价。"
+  },
+  {
+    "id": "ch13_ex4",
+    "section": "03",
+    "type": "multiple_choice",
+    "question": "在流处理管道中，为什么建议设置合理的batchSize和throttle参数？",
+    "options": [
+      "为了提高数据准确性",
+      "为了平衡处理延迟和系统吞吐量",
+      "为了增加内存使用",
+      "为了让引擎处理更慢"
+    ],
+    "answer": 1,
+    "explanation": "batchSize控制每批处理的消息条数——太大会增加延迟，太小会增加CPU上下文切换开销。throttle控制最大等待时间——避免数据稀疏时长时间不触发。二者共同平衡延迟和吞吐量。"
+  },
+  {
+    "id": "ch13_ex5",
+    "section": "04",
+    "type": "programming",
+    "question": "在DolphinDB中编写代码：创建一个响应式状态引擎，在流数据上实时计算RSI（14周期），并在RSI<30时输出买入信号。",
+    "answer": "rsiEngine = createReactiveStateEngine(\n    name=\"rsi_stream\",\n    metrics=[\n        <close>,\n        <100 - 100 / (1 + (mavg(iif(close > prev(close), close - prev(close), 0), 14) / mavg(iif(close < prev(close), prev(close) - close, 0), 14))) as RSI>,\n        <iif(100 - 100 / (1 + (mavg(iif(close > prev(close), close - prev(close), 0), 14) / mavg(iif(close < prev(close), prev(close) - close, 0), 14))) < 30, 1, 0) as buy_signal>\n    ],\n    dummyTable=priceStream,\n    outputTable=rsiOutput,\n    keyColumn=`symbol\n)",
+    "explanation": "RSI = 100 - 100/(1 + avg_gain/avg_loss)。avg_gain用mavg计算平均涨幅，avg_loss用mavg计算平均跌幅。当RSI<30时触发超卖买入信号。引擎按symbol分组独立维护状态。"
+  }
+]

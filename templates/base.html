@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}量化交易学习平台{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="/" class="logo">
+                    <span class="logo-icon">&#x1F4CA;</span>
+                    <span class="logo-text">量化学习平台</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <a href="/" class="nav-item {% if request.url.path == '/' %}active{% endif %}">
+                        <span class="nav-icon">&#x1F3E0;</span> 学习仪表盘
+                    </a>
+                    <a href="/progress" class="nav-item {% if request.url.path == '/progress' %}active{% endif %}">
+                        <span class="nav-icon">&#x1F4CA;</span> 学习进度
+                    </a>
+                    <a href="/notes" class="nav-item {% if request.url.path == '/notes' %}active{% endif %}">
+                        <span class="nav-icon">&#x1F4DD;</span> 学习笔记
+                    </a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">课程目录</div>
+                    {% for phase in phases %}
+                    <div class="nav-phase">
+                        <div class="nav-phase-title" onclick="togglePhase(this)">
+                            <span class="phase-toggle">&#x25B6;</span>
+                            {{ phase.phase_title }}
+                        </div>
+                        <div class="nav-phase-chapters">
+                            {% for ch in phase.chapters %}
+                            <a href="/chapter/{{ ch.id }}" class="nav-chapter {% if chapter and chapter.id == ch.id %}active{% endif %}">
+                                <span class="chapter-dot"></span>
+                                {{ ch.title }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <button class="sidebar-toggle" onclick="toggleSidebar()" title="切换侧边栏">&#x2630;</button>
+                <div class="top-bar-search">
+                    <form action="/search" method="get" class="search-form">
+                        <input type="text" name="q" placeholder="搜索课程内容..." value="{{ query|default('') }}">
+                        <button type="submit">&#x1F50D;</button>
+                    </form>
+                </div>
+                <div class="top-bar-actions">
+                    <button class="theme-toggle" onclick="toggleTheme()" title="切换暗色模式">
+                        <span class="theme-icon">&#x1F319;</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "ch05_ex01",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "在 DolphinDB 中创建股票日线行情数据库时，以下哪种分区组合方案最适合大规模量化分析？",
+    "options": [
+      "A. 仅按股票代码 HASH 分区",
+      "B. 仅按交易日期 VALUE 分区",
+      "C. 按日期的 VALUE 分区 + 按股票代码的 HASH 复合分区",
+      "D. 不分区，所有数据存入一张表"
+    ],
+    "answer": 2,
+    "explanation": "按日期 VALUE 分区 + 按股票代码 HASH 的复合分区（COMPO）是量化交易最标准的分区方案。日期分区保证时间范围查询时只扫描相关月份的分区，HASH 分区使股票数据在集群中均匀分布。单一分区要么无法高效过滤时间范围，要么无法均匀分布数据。"
+  },
+  {
+    "id": "ch05_ex02",
+    "section": "02",
+    "type": "true_false",
+    "question": "在 DolphinDB 中，存储股票代码时使用 STRING 类型比使用 SYMBOL 类型性能更好，因为 STRING 更通用。",
+    "answer": false,
+    "explanation": "错误。SYMBOL 类型的性能远优于 STRING。SYMBOL 将字符串映射为整数 ID 进行存储和比较，在 join、group by、where 过滤等高频操作中，SYMBOL 的性能通常是 STRING 的 3-5 倍。股票代码是典型的低基数重复字符串，完美匹配 SYMBOL 的设计理念。"
+  },
+  {
+    "id": "ch05_ex03",
+    "section": "03",
+    "type": "code_fill",
+    "question": "补全以下代码，使用 append! 函数将源表数据追加到目标表：\n\n```dolphindb\n// 创建目标表\ntarget = table(100:0, \n    `sym`close`volume,\n    [SYMBOL, DOUBLE, LONG]\n);\n\n// 创建源数据\nsource = table(\n    `000001`000002`000003 as sym,\n    15.67 22.80 8.55 as close,\n    12500000 5600000 22000000 as volume\n);\n\n// 将 source 追加到 target\ntarget.______(source);\n\n// 验证结果\nselect * from target;\n```",
+    "answer": "append!",
+    "explanation": "`append!` 是 DolphinDB 中用于将一个表的数据追加到另一个表末尾的高效函数。'!' 后缀在 DolphinDB 中表示“原地修改”操作，即直接修改目标对象而非创建副本。与逐行 INSERT INTO 相比，append! 的批量操作性能高出 10-100 倍。"
+  },
+  {
+    "id": "ch05_ex04",
+    "section": "04",
+    "type": "multiple_choice",
+    "question": "使用 loadTextEx 导入 CSV 数据到分区表时，如果 CSV 中包含日期列且格式为 '2024-01-15'，导入后日期列被识别为 STRING 类型，应如何处理？",
+    "options": [
+      "A. 直接重命名列即可",
+      "B. 使用手动 Schema 指定该列为 DATE 类型",
+      "C. 在 CSV 文件中删除该列",
+      "D. 使用 loadText 代替 loadTextEx"
+    ],
+    "answer": 1,
+    "explanation": "当 CSV 中的日期格式不被 DolphinDB 自动识别时（标准格式应为 '2024.01.15' 而非 '2024-01-15'），应通过手动 Schema 指定该列为 DATE 类型。如果不指定 Schema，DolphinDB 可能将其识别为 STRING 而非 DATE，导致后续的日期比较、范围查询等操作失效。"
+  },
+  {
+    "id": "ch05_ex05",
+    "section": "04",
+    "type": "true_false",
+    "question": "使用 loadTextEx 导入数据后，数据被持久化存储在 dfs:// 路径下，重启 DolphinDB 服务后数据仍然存在。",
+    "answer": true,
+    "explanation": "正确。loadTextEx 将数据导入到 `dfs://` 前缀的分布式数据库中，数据会被持久化到磁盘（数据节点配置的 volumes 路径）。除非显式执行 dropDatabase 或 dropTable，否则重启 DolphinDB 后数据不会丢失。这也是量化交易系统对数据存储的基本要求——数据持久可靠。"
+  }
+]

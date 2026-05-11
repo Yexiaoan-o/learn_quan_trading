@@ -1,0 +1,71 @@
+[
+  {
+    "id": "ch16_ex01",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "以下哪种风险属于量化交易中的“市场风险”？",
+    "options": [
+      "A. 程序代码中的逻辑错误",
+      "B. 交易对手无法履行合约义务",
+      "C. 股票价格因市场整体下跌而贬值",
+      "D. 交易所服务器宕机"
+    ],
+    "answer": 2,
+    "explanation": "市场风险（Market Risk）是指由市场价格不利变动导致的损失风险，如整体市场下跌导致持仓贬值。A是操作风险，B是信用风险，D是系统风险。"
+  },
+  {
+    "id": "ch16_ex02",
+    "section": "02",
+    "type": "true_false",
+    "question": "VaR（Value at Risk）表示在给定置信水平下，投资组合可能获得的最大收益。",
+    "options": [
+      "正确",
+      "错误"
+    ],
+    "answer": 1,
+    "explanation": "VaR表示的是在给定置信水平下的最大潜在损失，而不是最大收益。例如95%置信水平下的日VaR为10万，意味着有95%的概率单日损失不超过10万。"
+  },
+  {
+    "id": "ch16_ex03",
+    "section": "03",
+    "type": "code_fill",
+    "question": "计算移动止损线时，prices数组中从头到当前位置的累计最大值应使用NumPy的哪个函数？",
+    "code_template": "import numpy as np\ndef trailing_stop(prices, pct=0.05):\n    high_water = np.______.______(prices)\n    stop_level = high_water * (1 - pct)\n    return stop_level",
+    "answer": "np.maximum.accumulate 或 maximum;accumulate",
+    "explanation": "numpy.maximum.accumulate(prices) 返回一个数组，其中每个元素都是prices中从头到当前位置的最大值，这是实现移动止损中“高位水印”的核心步骤。"
+  },
+  {
+    "id": "ch16_ex04",
+    "section": "04",
+    "type": "multiple_choice",
+    "question": "使用ATR止损时，当市场波动率升高，止损距离会如何变化？",
+    "options": [
+      "A. 保持不变",
+      "B. 自动缩小",
+      "C. 自动扩大",
+      "D. 无法确定"
+    ],
+    "answer": 2,
+    "explanation": "ATR（平均真实波幅）越高说明市场波动越大。ATR止损使用 multiplier × ATR 作为止损距离，因此市场波动升高时，止损距离自动扩大，避免被异常波动过早扫出市场。这是ATR止损的自适应特性。"
+  },
+  {
+    "id": "ch16_ex05",
+    "section": "04",
+    "type": "true_false",
+    "question": "压力测试中的“假设性情景”必须基于真实发生过的历史事件来构建。",
+    "options": [
+      "正确",
+      "错误"
+    ],
+    "answer": 1,
+    "explanation": "假设性情景（Hypothetical Scenarios）不依赖历史数据，而是基于“如果……会怎样”的逻辑设计，如相关性崩溃、流动性枯竭等可能从未发生过但理论上存在的极端情况。基于历史事件的叫“历史情景”测试。"
+  },
+  {
+    "id": "ch16_ex06",
+    "section": "04",
+    "type": "programming",
+    "question": "编写一个函数 calculate_var_historical，使用历史模拟法计算投资组合的日VaR。给定每日收益率序列 returns（numpy数组），在95%置信水平下计算VaR值。提示：对收益率排序后取第5百分位数。",
+    "answer": "import numpy as np\n\ndef calculate_var_historical(returns, confidence=0.95):\n    sorted_returns = np.sort(returns)\n    index = int((1 - confidence) * len(sorted_returns))\n    var = -sorted_returns[index]\n    return var",
+    "explanation": "历史模拟法计算VaR：1）将历史收益率从小到大排序；2）取第 (1-置信水平) 分位数的收益率值；3）取负号得到VaR值。例如95%置信水平下取第5百分位数的收益率值。"
+  }
+]

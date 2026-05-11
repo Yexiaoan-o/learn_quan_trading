@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ch8_ex1",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "量化交易策略的生命周期包含哪些阶段？",
+    "options": [
+      "研究设计 → 实盘上线 → 结束",
+      "研究设计 → 回测验证 → 模拟交易 → 实盘上线 → 监控迭代",
+      "数据收集 → 程序编写 → 自动交易",
+      "回测 → 优化参数 → 实盘交易"
+    ],
+    "answer": 1,
+    "explanation": "完整的量化策略生命周期包括五个阶段：研究设计、回测验证、模拟交易、实盘上线和监控迭代。每个阶段都有其独特的目标和验证要点。"
+  },
+  {
+    "id": "ch8_ex2",
+    "section": "01",
+    "type": "true_false",
+    "question": "信号（Signal）和策略（Strategy）是同一个概念，可以互换使用。",
+    "answer": false,
+    "explanation": "信号和策略不同。信号是一种输入信息（如RSI<30表示超卖），而策略是将信号转化为具体交易动作的完整规则集（如RSI<30时买入，RSI>70时卖出）。一个策略通常综合多个信号。"
+  },
+  {
+    "id": "ch8_ex3",
+    "section": "02",
+    "type": "code_fill",
+    "question": "补全代码：使用滚动窗口计算5日和20日简单移动平均线（SMA），并生成趋势方向信号（价格在均线上方为1，下方为-1）。",
+    "answer": "df['ma_5'] = df['close'].rolling(5).mean()\ndf['ma_20'] = df['close'].rolling(20).mean()\ndf['ma_trend'] = np.where(df['close'] > df['ma_20'], 1, -1)",
+    "explanation": "使用pandas的.rolling()方法计算滚动窗口均值，np.where()根据条件生成方向信号。"
+  },
+  {
+    "id": "ch8_ex4",
+    "section": "03",
+    "type": "multiple_choice",
+    "question": "在CAPM模型中，如果某投资组合的Alpha为0.05（年化）、Beta为1.2，以下哪项解释是正确的？",
+    "options": [
+      "组合的收益完全由市场驱动，不存在超额收益",
+      "组合比市场波动更大，且存在正的超额收益",
+      "组合与市场的波动完全一致",
+      "Alpha为0.05意味着组合不存在任何风险"
+    ],
+    "answer": 1,
+    "explanation": "Beta=1.2表示组合比市场波动大20%，属于进攻型组合；Alpha=0.05（年化5%）表示存在正的超额收益，即策略跑赢了仅由市场风险补偿的预期收益。"
+  },
+  {
+    "id": "ch8_ex5",
+    "section": "04",
+    "type": "multiple_choice",
+    "question": "凯利公式中的f*为负数时，意味着什么？",
+    "options": [
+      "应该做空该资产",
+      "应该以该比例的绝对值投入资金",
+      "不应该参与这个交易机会",
+      "凯利公式计算错误"
+    ],
+    "answer": 2,
+    "explanation": "凯利公式f*为负时，说明预期收益为负，从数学上讲不应该在这个'赌局'上下注。这通常发生在胜率太低而盈亏比不够高的场景。"
+  },
+  {
+    "id": "ch8_ex6",
+    "section": "04",
+    "type": "programming",
+    "question": "编写一个函数，实现固定比例风险模型的仓位计算。给定账户权益100万，每笔风险2%，入场价30元，止损价28元，计算应买入的股数和持仓占比。",
+    "answer": "def fixed_fractional_position(equity, risk_pct, entry_price, stop_price):\n    risk_amount = equity * risk_pct\n    risk_per_share = abs(entry_price - stop_price)\n    shares = int(risk_amount / risk_per_share)\n    position_value = shares * entry_price\n    position_pct = position_value / equity\n    return shares, position_pct\n\n# 计算\nshares, pct = fixed_fractional_position(1000000, 0.02, 30, 28)\nprint(f'应买入{shares}股，占总仓位{pct:.1%}')\n# 输出: 应买入10000股，占总仓位30.0%",
+    "explanation": "风险金额 = 100万 × 2% = 2万元。每股风险 = 30 - 28 = 2元。应买股数 = 20000 / 2 = 10000股。持仓价值 = 10000 × 30 = 30万，占比30%。"
+  }
+]

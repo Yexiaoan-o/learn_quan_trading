@@ -1,0 +1,54 @@
+[
+  {
+    "id": "ch04_ex01",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "关于 DolphinDB 的核心定位，以下哪个描述最准确？",
+    "options": [
+      "A. 一款替代 MySQL 的关系型数据库",
+      "B. 专门用于网页开发的 NoSQL 数据库",
+      "C. 集数据库、分布式计算和编程语言于一体的高性能时序数据平台",
+      "D. 一个纯 Python 的金融数据分析库"
+    ],
+    "answer": 2,
+    "explanation": "DolphinDB 的核心定位是“将数据库、分布式计算引擎和编程语言深度整合”的统一平台。它融合了时序数据库的存储能力、分布式计算框架的处理能力和一门完整的向量化编程语言，专为海量时序数据（尤其是金融数据）的处理而设计。"
+  },
+  {
+    "id": "ch04_ex02",
+    "section": "01",
+    "type": "true_false",
+    "question": "DolphinDB 的 TSDB 引擎专为高频行情数据的时序存储设计，提供高压缩比和快速区间查询能力。",
+    "answer": true,
+    "explanation": "正确。TSDB（Time Series Database）引擎是 DolphinDB 为时序数据优化的存储引擎，特点包括：数据按时间排序存储以加速时间范围查询、采用列式压缩降低存储成本、支持快速的时间序列聚合函数。在量化交易场景中，Tick 行情数据和分钟线数据最适合使用 TSDB 引擎存储。"
+  },
+  {
+    "id": "ch04_ex03",
+    "section": "02",
+    "type": "multiple_choice",
+    "question": "DolphinDB 服务器启动成功后，默认监听的端口号是多少？",
+    "options": [
+      "A. 8080",
+      "B. 8848",
+      "C. 3306",
+      "D. 6379"
+    ],
+    "answer": 1,
+    "explanation": "DolphinDB 默认端口是 8848。该端口号取自珠穆朗玛峰的海拔高度 8848 米，寓意在时序数据库领域的“登峰之作”。8080 是常见 Web 服务端口，3306 是 MySQL 默认端口，6379 是 Redis 默认端口。"
+  },
+  {
+    "id": "ch04_ex04",
+    "section": "03",
+    "type": "true_false",
+    "question": "通过 Web Console 以游客（Guest）身份登录 DolphinDB 后，可以执行 INSERT INTO 语句向数据库中写入数据。",
+    "answer": false,
+    "explanation": "错误。游客（Guest/匿名）登录仅有只读权限，不能执行任何写操作。如果需要写入数据、创建表、修改数据库等操作，必须使用管理员账号（admin）或其他具有写权限的账号登录。"
+  },
+  {
+    "id": "ch04_ex05",
+    "section": "04",
+    "type": "code_fill",
+    "question": "补全以下 DolphinDB 代码，创建一张包含股票代码、日期和收盘价的表，并计算每只股票的平均收盘价：\n\n```dolphindb\nt = table(\n    `000001`000001`000002`000002 as sym,\n    2024.01.02 2024.01.03 2024.01.02 2024.01.03 as trade_date,\n    15.20 15.67 22.50 22.80 as close\n);\n\nselect sym, ______(close) as avg_close from t group by sym;\n```",
+    "answer": "avg",
+    "explanation": "`avg()` 是 DolphinDB 的内置聚合函数，用于计算平均值。该 SQL 查询按股票代码（sym）分组，计算每组收盘价的平均值。类似的常用聚合函数包括 sum、max、min、count、std（标准差）、first、last 等。"
+  }
+]

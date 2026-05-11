@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}学习进度 - 量化交易学习平台{% endblock %}
+
+{% block content %}
+<div class="progress-page">
+    <h1>&#x1F4CA; 学习进度概览</h1>
+
+    <div class="progress-stats-grid">
+        <div class="progress-stat-card">
+            <div class="pstat-value">{{ stats.completed_sections }}</div>
+            <div class="pstat-label">已完成章节数</div>
+        </div>
+        <div class="progress-stat-card">
+            <div class="pstat-value">{{ stats.total_exercises_attempted }}</div>
+            <div class="pstat-label">已做习题数</div>
+        </div>
+        <div class="progress-stat-card">
+            <div class="pstat-value">{{ stats.correct_exercises }}</div>
+            <div class="pstat-label">答对习题数</div>
+        </div>
+        <div class="progress-stat-card">
+            <div class="pstat-value">{{ stats.accuracy }}%</div>
+            <div class="pstat-label">总体正确率</div>
+        </div>
+    </div>
+
+    <div class="phase-progress-list">
+        {% for ps in phase_stats %}
+        <div class="phase-progress-item">
+            <div class="ppi-header">
+                <h3>{{ ps.title }}</h3>
+                <span class="ppi-chapter-progress">
+                    章节: {{ ps.completed_sections }}/{{ ps.total_sections }}
+                </span>
+                <span class="ppi-exercise-progress">
+                    习题: {{ ps.completed_exercises }}/{{ ps.total_exercises }}
+                </span>
+            </div>
+            <div class="ppi-bars">
+                <div class="ppi-bar-group">
+                    <span class="ppi-bar-label">章节进度</span>
+                    <div class="ppi-bar">
+                        <div class="ppi-bar-fill ppi-fill-chapter" style="width:{{ ps.section_pct }}%"></div>
+                    </div>
+                    <span class="ppi-bar-pct">{{ ps.section_pct }}%</span>
+                </div>
+                <div class="ppi-bar-group">
+                    <span class="ppi-bar-label">习题进度</span>
+                    <div class="ppi-bar">
+                        <div class="ppi-bar-fill ppi-fill-exercise" style="width:{{ ps.exercise_pct }}%"></div>
+                    </div>
+                    <span class="ppi-bar-pct">{{ ps.exercise_pct }}%</span>
+                </div>
+            </div>
+            <div class="ppi-chapters">
+                {% for phase in phases %}
+                    {% if phase.phase_key == ps.key %}
+                        {% for ch in phase.chapters %}
+                        <div class="ppi-chapter-row">
+                            <span class="ppi-chapter-name">{{ ch.title }}</span>
+                            <a href="/chapter/{{ ch.id }}" class="btn btn-sm btn-outline">进入</a>
+                            <a href="/exercise/{{ ch.id }}" class="btn btn-sm btn-outline">习题</a>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

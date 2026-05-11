@@ -1,0 +1,68 @@
+[
+  {
+    "id": "ch06_ex01",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "在 DolphinDB 分区表上执行 `select * from loadTable('dfs://stock_day', 'kline_day')` 查询，以下描述正确的是？",
+    "options": [
+      "A. 不会返回任何数据，因为分区表不支持 select *",
+      "B. 会立即返回全表数据，性能优秀",
+      "C. 语法正确，但会触发全表扫描，在生产环境中应避免",
+      "D. 会自动只返回最新一天的数据"
+    ],
+    "answer": 2,
+    "explanation": "`select *` 在分区表上语法正确，但它会触发全表扫描，将所有分区数据加载到内存中。在包含数十亿行数据的生产环境中，这可能导致内存溢出或查询超时。生产环境务必添加有效的 WHERE 条件以利用分区裁剪，只扫描相关分区。"
+  },
+  {
+    "id": "ch06_ex02",
+    "section": "02",
+    "type": "code_fill",
+    "question": "补全以下 DolphinDB 代码，按股票代码计算日均成交量，并只保留日均成交量大于 500 万股的股票：\n\n```dolphindb\nt = loadTable(\"dfs://stock_day\", \"kline_day\");\n\nselect \n    sym,\n    count(*) as trading_days,\n    avg(volume) as avg_daily_vol\nfrom t\nwhere trade_date between 2024.01.01:2024.06.30\ngroup by sym\n______ avg_daily_vol > 5000000\norder by avg_daily_vol desc;\n```",
+    "answer": "having",
+    "explanation": "使用 HAVING 子句对分组聚合后的结果进行过滤。WHERE 在分组前过滤原始行，HAVING 在分组后过滤聚合结果。此处需要过滤的是 avg(volume) 的结果（聚合值），因此必须使用 HAVING 而非 WHERE。"
+  },
+  {
+    "id": "ch06_ex03",
+    "section": "03",
+    "type": "true_false",
+    "question": "CONTEXT BY 和 GROUP BY 都会将相同分组键的行压缩为一行，两者的输出行数相同。",
+    "answer": false,
+    "explanation": "错误。这是两者最核心的区别：GROUP BY 会将每个分组压缩为一行（输出行数 = 分组数），而 CONTEXT BY 保留原始数据的每一行，仅在分组上下文内进行计算（输出行数 = 输入行数）。因此 CONTEXT BY 特别适合移动平均、累计和、排名等需要保留逐行数据的时序计算。"
+  },
+  {
+    "id": "ch06_ex04",
+    "section": "03",
+    "type": "multiple_choice",
+    "question": "以下量化分析任务中，最适合使用 CONTEXT BY 而非 GROUP BY 的场景是？",
+    "options": [
+      "A. 计算每只股票 2024 年全年的总成交量",
+      "B. 计算每个行业包含的股票数量",
+      "C. 计算每只股票过去 20 个交易日的移动平均收盘价",
+      "D. 计算全市场所有股票的日均成交额汇总"
+    ],
+    "answer": 2,
+    "explanation": "移动平均线是典型的“组内窗口计算”——需要在每只股票的分组内，逐行计算过去 20 日的平均值，且需要保留每一行的计算结果。这是 CONTEXT BY 的经典场景。A、B、D 都是降维聚合需求，用 GROUP BY 更合适。"
+  },
+  {
+    "id": "ch06_ex05",
+    "section": "04",
+    "type": "true_false",
+    "question": "pivot by 可以将'日期 × 股票'的长格式数据转换为宽格式矩阵，例如将每只股票在每行的收盘价，重塑为每天一行、每只股票一列的矩阵格式。",
+    "answer": true,
+    "explanation": "正确。pivot by 的核心功能就是将长格式（EAV：实体-属性-值）数据转化为宽格式矩阵，使得行表示某个维度（如日期），列表示另一个维度（如股票代码），单元格填充指标值（如收盘价）。这在量化分析中极其重要，因为收益率矩阵、协方差矩阵等计算都要求数据为宽格式。"
+  },
+  {
+    "id": "ch06_ex06",
+    "section": "04",
+    "type": "multiple_choice",
+    "question": "使用 pivot by 时，如果同一 trade_date 和 sym 的组合在源表中有多条记录（例如因为数据重复），会发生什么？",
+    "options": [
+      "A. 自动取最后一条记录",
+      "B. 自动计算平均值填充",
+      "C. 会报错，因为 pivot by 要求行+列组合唯一",
+      "D. 随机选择一条记录"
+    ],
+    "answer": 2,
+    "explanation": "pivot by 要求每个（行维度，列维度）组合在数据集中唯一——即每个日期和股票代码组合只能有一条记录。如果存在重复，DolphinDB 会报错。解决方法是先用 GROUP BY 等聚合手段将数据去重或归并，然后再执行 pivot by。"
+  }
+]

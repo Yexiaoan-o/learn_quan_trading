@@ -1,0 +1,54 @@
+[
+  {
+    "id": "ch07_ex01",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "在 DolphinDB 中，存储股票代码时应优先使用哪种数据类型？为什么？",
+    "options": [
+      "A. STRING 类型，因为字符串更通用",
+      "B. INT 类型，将代码转为数字映射",
+      "C. SYMBOL 类型，因为内部以整数 ID 映射存储，性能更优",
+      "D. CHAR 类型，因为代码长度固定"
+    ],
+    "answer": 2,
+    "explanation": "SYMBOL 类型将字符串映射为整数 ID 进行内部存储和比较，在 join、group by、where 过滤等高频操作中，SYMBOL 的性能通常是 STRING 的 3-5 倍。股票代码是典型的低基数重复字符串，完全匹配 SYMBOL 的设计场景。"
+  },
+  {
+    "id": "ch07_ex02",
+    "section": "02",
+    "type": "code_fill",
+    "question": "补全以下 DolphinDB 代码，使用向量化方式计算价格序列中大于均值的元素个数：\n\n```dolphindb\nprices = 15.0 22.0 8.0 45.0 12.0 30.0 18.0;\n\n// 计算均值\navg_price = avg(prices);\n\n// 计算大于均值的元素个数\ncount_above_avg = ______(prices > avg_price);\n\nprint(\"大于均值的个数: \" + string(count_above_avg));\n```",
+    "answer": "sum",
+    "explanation": "`prices > avg_price` 返回一个 BOOL 向量（如 [0,1,0,1,0,1,0]），`sum()` 函数统计其中值为 true 的元素个数。这是一个经典的向量化计算模式——通过布尔向量 + 聚合函数（sum/avg）来替代循环遍历，性能远优于 for 循环。"
+  },
+  {
+    "id": "ch07_ex03",
+    "section": "02",
+    "type": "true_false",
+    "question": "DolphinDB 中 `x = 10`（=前后无空格）声明的是全局变量，`x  = 10`（=前有空格）声明的是局部变量。",
+    "answer": true,
+    "explanation": "正确。这是 DolphinDB 独特的变量作用域规则：`=` 前没有空白字符 → 全局变量；` = `（`=` 前有空白字符）→ 局部变量。这一规则容易混淆，建议在函数内部统一使用 ` = ` 风格声明局部变量，避免与全局变量冲突。"
+  },
+  {
+    "id": "ch07_ex04",
+    "section": "03",
+    "type": "multiple_choice",
+    "question": "Def 函数 `def a_func(data) { ... }` 定义后，能自动支持向量化调用，即传入一个向量参数会逐元素返回计算结果。关于这种说法，以下哪个描述正确？",
+    "options": [
+      "A. 正确，所有 def 函数自动支持向量化",
+      "B. 部分正确，只有当函数体内使用了向量化函数时才支持",
+      "C. 正确，但需要使用 each 高阶函数封装",
+      "D. 不正确，def 函数只接受标量参数"
+    ],
+    "answer": 1,
+    "explanation": "def 函数的向量化能力取决于函数体内使用的函数。如果函数体内使用了向量化函数（如 `+`, `*`, `avg`, `mavg` 等），则传入向量时该函数自动以向量化方式执行。但如果函数体内有非向量化的逻辑（如 `for`, `if` 对标量的操作），传入向量可能导致错误。本质上是“内部函数决定外部行为”，而非自动支持。"
+  },
+  {
+    "id": "ch07_ex05",
+    "section": "04",
+    "type": "true_false",
+    "question": "在量化数据流水线中，应该尽可能将聚合、过滤和窗口计算放在 SQL 中完成，而非将全量数据拉到脚本层面再处理。",
+    "answer": true,
+    "explanation": "正确。这个原则称为“计算下沉”（Push Compute Down to Data）：SQL 引擎能利用分区裁剪、索引和内部优化高效执行聚合过滤，而脚本层处理会丢失这些优化，且需要将全量数据从引擎传输到脚本层（IO 开销巨大）。先用 SQL 缩小数据集，再用脚本做精细计算，是最高效的混合范式工作流。"
+  }
+]

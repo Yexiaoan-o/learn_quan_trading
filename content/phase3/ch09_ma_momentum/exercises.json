@@ -1,0 +1,62 @@
+[
+  {
+    "id": "ch9_ex1",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "关于指数移动平均线（EMA），以下哪项描述是正确的？",
+    "options": [
+      "EMA对每个周期赋予相同的权重",
+      "EMA给予近期价格更高的权重，比SMA反应更快",
+      "EMA的计算速度比SMA慢得多",
+      "EMA不能用于日内交易"
+    ],
+    "answer": 1,
+    "explanation": "EMA通过指数衰减赋予近期价格更高权重，公式中alpha=2/(N+1)控制衰减速度。这使得EMA比SMA更快响应价格变化。"
+  },
+  {
+    "id": "ch9_ex2",
+    "section": "02",
+    "type": "true_false",
+    "question": "双均线交叉策略中，金叉（Golden Cross）是指短期均线下穿长期均线，发出卖出信号。",
+    "answer": false,
+    "explanation": "金叉是指短期均线**上穿**长期均线，发出**买入**信号。死叉是短期均线下穿长期均线，发出卖出信号。"
+  },
+  {
+    "id": "ch9_ex3",
+    "section": "02",
+    "type": "code_fill",
+    "question": "补全代码：在回测循环中处理卖出信号的逻辑。",
+    "answer": "elif signal == -1 and shares > 0:\n    sell_price = price * (1 - slippage)\n    revenue = shares * sell_price * (1 - commission_rate)\n    capital += revenue\n    shares = 0",
+    "explanation": "卖出信号且持仓时，计算卖出收入（扣除滑点和手续费），将收入加入现金，持仓清零。"
+  },
+  {
+    "id": "ch9_ex4",
+    "section": "03",
+    "type": "multiple_choice",
+    "question": "在学术界标准的动量因子定义中（Jegadeesh & Titman, 1993），为什么通常要跳过最近1个月的收益？",
+    "options": [
+      "因为最近1个月的数据通常不可用",
+      "为了避免短期反转效应的干扰",
+      "因为这1个月是强制持仓期",
+      "为了减少计算量"
+    ],
+    "answer": 1,
+    "explanation": "短期反转效应（也称反转效应）指的是过去1个月表现好的股票在接下来倾向于表现差。跳过最近1个月可以避免这种短期反转对动量因子的负面影响，使动量因子更加纯净。"
+  },
+  {
+    "id": "ch9_ex5",
+    "section": "04",
+    "type": "programming",
+    "question": "在DolphinDB中，编写SQL语句计算某只股票的5日、20日和60日简单移动平均线，并判断是否存在多头排列（MA5 > MA20 > MA60）。",
+    "answer": "select\n    date,\n    close,\n    mavg(close, 5) as ma_5,\n    mavg(close, 20) as ma_20,\n    mavg(close, 60) as ma_60,\n    iif(mavg(close, 5) > mavg(close, 20) and mavg(close, 20) > mavg(close, 60), 1, 0) as bullish_alignment\nfrom stock_daily\nwhere symbol = 'A1'",
+    "explanation": "使用mavg函数计算各周期均线，用iif函数判断多头排列条件。多头排列表示各短期均线都在长期均线上方，是强烈的看涨信号。"
+  },
+  {
+    "id": "ch9_ex6",
+    "section": "03",
+    "type": "true_false",
+    "question": "动量策略在全市场剧烈反转（如2009年3月的反弹）时通常表现优异。",
+    "answer": false,
+    "explanation": "恰恰相反。动量策略在市场剧烈反转时会遭受重大损失，这一现象被称为\"动量崩溃\"（Momentum Crash）。因为在下跌趋势中动量策略持有空头仓位，一旦市场突然V型反转，损失会非常惨重。这也是动量策略最大的风险之一。"
+  }
+]

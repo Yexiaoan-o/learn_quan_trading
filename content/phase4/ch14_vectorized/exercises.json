@@ -1,0 +1,54 @@
+[
+  {
+    "id": "ch14_ex1",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "为什么向量化计算比逐行循环快得多？",
+    "options": [
+      "因为向量化代码行数少",
+      "因为向量化利用CPU的SIMD指令和内存预取，在C++层面批量执行，消除了Python解释器的循环开销",
+      "因为向量化使用GPU计算",
+      "因为向量化会自动开启多线程"
+    ],
+    "answer": 1,
+    "explanation": "向量化计算通过SIMD指令集并行处理数据，数据存储在连续内存中便于缓存预取，且在底层C/C++实现中消除了Python循环的解释器开销，综合提升10-100倍。"
+  },
+  {
+    "id": "ch14_ex2",
+    "section": "02",
+    "type": "code_fill",
+    "question": "补全代码：使用DolphinDB的管道操作符实现数据处理流程：筛选 → 计算均线 → 生成信号。",
+    "answer": "result = daily_data\n    |> select where close > 0 and volume > 0\n    |> select *, mavg(close, 20) as ma_20, mavg(close, 60) as ma_60\n    |> select *, iif(ma_20 > ma_60, 1, -1) as signal",
+    "explanation": "管道操作符|>让数据从左到右依次流过各个处理步骤。第一步过滤无效数据，第二步计算均线，第三步基于金叉/死叉生成信号。"
+  },
+  {
+    "id": "ch14_ex3",
+    "section": "02",
+    "type": "true_false",
+    "question": "cross高阶函数用于生成两个向量的笛卡尔积，适合批量计算股票对之间的相关系数或价差。",
+    "answer": true,
+    "explanation": "cross(func, X, Y)对X和Y的每对元素应用func，产生|X|×|Y|的结果矩阵。在配对交易筛选中，可以一次性计算所有N×N对股票的相关系数矩阵。"
+  },
+  {
+    "id": "ch14_ex4",
+    "section": "04",
+    "type": "programming",
+    "question": "在DolphinDB中编写一个混合范式的函数：使用SQL获取价格数据，向量化计算20日Z-score和动量，然后用peach并行计算每只股票的夏普比率。",
+    "answer": "def analyzeStocks(priceData){\n    base = select\n        symbol, date, close,\n        (close - mavg(close, 20)) / mstd(close, 20) as zscore,\n        log(close / move(close, 20)) as momentum\n    from priceData\n    context by symbol\n\n    symbols = exec distinct symbol from base\n    results = peach(def(sym){\n        rets = exec log(close / prev(close)) from base where symbol = sym\n        sharpe = avg(rets) / std(rets) * sqrt(252)\n        return dict(STRING, DOUBLE, [`symbol, `sharpe], [sym, sharpe])\n    }, symbols)\n    return results\n}",
+    "explanation": "函数结合了三种范式：SQL用于获取数据和计算基础指标（context by分组），向量化在select中一次性计算全列Z-score和动量，peach函数式用于并行计算每只股票的夏普比率。"
+  },
+  {
+    "id": "ch14_ex5",
+    "section": "03",
+    "type": "multiple_choice",
+    "question": "在DolphinDB中，对于按日查询为主的tick数据，最佳的分区方案是什么？",
+    "options": [
+      "仅按股票代码HASH分区",
+      "按日期VALUE分区 + 股票HASH分区（2层复合分区）",
+      "仅按日期RANGE分区",
+      "不分区，单表存储"
+    ],
+    "answer": 1,
+    "explanation": "对于按日查询的tick数据，2层复合分区最佳：第一层VALUE按日分区（精确匹配日期过滤），第二层HASH按股票分区（并行处理多股票）。这样查询特定日期的数据只扫描1个日期分区，大幅减少IO。"
+  }
+]

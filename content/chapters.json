@@ -1,0 +1,57 @@
+{
+  "phase1": {
+    "title": "阶段一：零基础入门",
+    "description": "从零开始，建立对量化交易的基本认知，掌握必要的金融市场知识和Python数据分析工具。",
+    "chapters": [
+      {"id": "ch01", "title": "量化交易概述", "dir": "phase1/ch01_overview", "order": 1},
+      {"id": "ch02", "title": "Python 数据分析基础", "dir": "phase1/ch02_python_basics", "order": 2},
+      {"id": "ch03", "title": "金融市场基础知识", "dir": "phase1/ch03_market_basics", "order": 3}
+    ]
+  },
+  "phase2": {
+    "title": "阶段二：DolphinDB 入门",
+    "description": "学习 DolphinDB 数据库的核心概念与基本操作，掌握建库、建表、数据写入和查询。",
+    "chapters": [
+      {"id": "ch04", "title": "DolphinDB 简介与安装", "dir": "phase2/ch04_ddb_intro", "order": 4},
+      {"id": "ch05", "title": "建库建表与数据写入", "dir": "phase2/ch05_ddb_table", "order": 5},
+      {"id": "ch06", "title": "数据查询与SQL基础", "dir": "phase2/ch06_ddb_sql", "order": 6},
+      {"id": "ch07", "title": "DolphinDB 编程语言基础", "dir": "phase2/ch07_ddb_lang", "order": 7}
+    ]
+  },
+  "phase3": {
+    "title": "阶段三：量化交易策略基础",
+    "description": "深入学习主流量化交易策略的原理与实现，理解因子模型的构建方法。",
+    "chapters": [
+      {"id": "ch08", "title": "量化策略概论", "dir": "phase3/ch08_strategy_overview", "order": 8},
+      {"id": "ch09", "title": "均线策略与动量策略", "dir": "phase3/ch09_ma_momentum", "order": 9},
+      {"id": "ch10", "title": "均值回归策略", "dir": "phase3/ch10_mean_reversion", "order": 10},
+      {"id": "ch11", "title": "量化因子分析基础", "dir": "phase3/ch11_factor_analysis", "order": 11}
+    ]
+  },
+  "phase4": {
+    "title": "阶段四：DolphinDB 进阶",
+    "description": "深入掌握 DolphinDB 的时序数据处理、流计算和向量化编程能力。",
+    "chapters": [
+      {"id": "ch12", "title": "时序数据处理", "dir": "phase4/ch12_time_series", "order": 12},
+      {"id": "ch13", "title": "流数据处理", "dir": "phase4/ch13_streaming", "order": 13},
+      {"id": "ch14", "title": "向量化计算与函数式编程", "dir": "phase4/ch14_vectorized", "order": 14}
+    ]
+  },
+  "phase5": {
+    "title": "阶段五：回测与风险管理",
+    "description": "学习策略回测的完整流程，掌握风险管理的核心指标与方法。",
+    "chapters": [
+      {"id": "ch15", "title": "策略回测框架", "dir": "phase5/ch15_backtest", "order": 15},
+      {"id": "ch16", "title": "风险管理基础", "dir": "phase5/ch16_risk_management", "order": 16},
+      {"id": "ch17", "title": "DolphinDB 回测引擎", "dir": "phase5/ch17_ddb_backtest", "order": 17}
+    ]
+  },
+  "phase6": {
+    "title": "阶段六：综合实践",
+    "description": "将所学知识融会贯通，完成从策略设计到回测评估的完整实战项目。",
+    "chapters": [
+      {"id": "ch18", "title": "DolphinDB 金融因子实战", "dir": "phase6/ch18_financial_factors", "order": 18},
+      {"id": "ch19", "title": "综合案例：端到端实战", "dir": "phase6/ch19_end_to_end", "order": 19}
+    ]
+  }
+}

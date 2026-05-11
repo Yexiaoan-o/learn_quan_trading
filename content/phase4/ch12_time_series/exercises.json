@@ -1,0 +1,54 @@
+[
+  {
+    "id": "ch12_ex1",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "在DolphinDB中，TIMESTAMP类型的精度是什么？",
+    "options": [
+      "精确到秒",
+      "精确到毫秒",
+      "精确到微秒",
+      "精确到纳秒"
+    ],
+    "answer": 1,
+    "explanation": "DolphinDB中TIMESTAMP类型精确到毫秒（如2024.01.15T14:30:00.500）。如果需要纳秒精度，应使用NANOTIMESTAMP类型。"
+  },
+  {
+    "id": "ch12_ex2",
+    "section": "02",
+    "type": "code_fill",
+    "question": "补全代码：在DolphinDB中使用窗口函数计算20日移动标准差和60日滚动Beta（相对于市场指数）。",
+    "answer": "select\n    symbol,\n    date,\n    close,\n    mstd(close, 20) as std_20,\n    mbeta(log(close / prev(close)), log(market_close / prev(market_close)), 60) as beta_60\nfrom daily_data\ncontext by symbol",
+    "explanation": "mstd计算移动标准差，mbeta计算两个序列的滚动Beta系数。需要context by symbol确保按股票分组计算。"
+  },
+  {
+    "id": "ch12_ex3",
+    "section": "03",
+    "type": "true_false",
+    "question": "ASOF Join (aj) 要求右表按匹配列排序，其中最后一个匹配列通常是时间列且必须升序排列。",
+    "answer": true,
+    "explanation": "aj函数要求右表的最后一个匹配列（通常是时间列）升序排列，否则查找'最接近的前一条记录'的逻辑无法正确执行。这是使用aj时必须注意的前提条件。"
+  },
+  {
+    "id": "ch12_ex4",
+    "section": "04",
+    "type": "programming",
+    "question": "在DolphinDB中编写SQL，从逐笔成交数据（tick_data）生成5分钟K线（包含open, high, low, close, volume），时间按09:30对齐。",
+    "answer": "select\n    bar(timestamp - 09:30:00.000, 5m) + 09:30:00.000 as bar_time,\n    first(price) as open,\n    max(price) as high,\n    min(price) as low,\n    last(price) as close,\n    sum(volume) as volume\nfrom tick_data\nwhere symbol = '000001.SZ' and date = 2024.01.15\ngroup by bar(timestamp - 09:30:00.000, 5m)\norder by bar_time",
+    "explanation": "通过bar(timestamp - 09:30, 5m) + 09:30将时间桶对齐到09:30开盘时间。first/max/min/last分别取开盘价、最高价、最低价、收盘价，sum取总成交量。"
+  },
+  {
+    "id": "ch12_ex5",
+    "section": "02",
+    "type": "multiple_choice",
+    "question": "以下哪个窗口函数用于计算移动排名？",
+    "options": [
+      "mavg",
+      "mstd",
+      "mrank",
+      "mcorr"
+    ],
+    "answer": 2,
+    "explanation": "mrank(X, ascending, window)计算在指定窗口大小内的排名。例如mrank(close, true, 20)返回收盘价在最近20天内的升序排名（1=最低，20=最高）。"
+  }
+]

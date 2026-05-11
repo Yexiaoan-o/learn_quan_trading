@@ -1,0 +1,55 @@
+[
+  {
+    "id": "ch18_ex01",
+    "section": "01",
+    "type": "multiple_choice",
+    "question": "DolphinDB的TA模块包含多少个技术分析指标？",
+    "options": ["A. 约20个", "B. 约40个", "C. 60多个", "D. 100+个"],
+    "answer": 2,
+    "explanation": "TA（Technical Analysis）模块包含60多种技术分析指标，涵盖趋势指标、震荡指标、均线指标、波动指标和量价指标五大类别。"
+  },
+  {
+    "id": "ch18_ex02",
+    "section": "02",
+    "type": "code_fill",
+    "question": "在DolphinDB中，MACD指标包含DIF、DEA和柱状图三个分量。以下代码获取MACD柱状图的分量索引正确的是？",
+    "code_template": "use ta\nmacd_result = ta::macd(close, 12, 26, 9)\nhist = macd_result[___]   // MACD柱状图的分量索引",
+    "answer": "2",
+    "explanation": "ta::macd函数返回三个分量：macd_result[0]为DIF快线，macd_result[1]为DEA信号线，macd_result[2]为MACD柱状图（histogram）。注意这是2倍放大后的值。"
+  },
+  {
+    "id": "ch18_ex03",
+    "section": "03",
+    "type": "true_false",
+    "question": "因子预处理中，标准化（Standardization）应该在去极值（Winsorization）之前执行。",
+    "options": ["正确", "错误"],
+    "answer": 1,
+    "explanation": "这是错误的。因子预处理必须先去极值再标准化。因为极值（异常值）会严重影响均值和标准差的计算，如果先标准化，极值会导致均值和标准差失真，使标准化结果不可靠。"
+  },
+  {
+    "id": "ch18_ex04",
+    "section": "03",
+    "type": "multiple_choice",
+    "question": "以下哪个因素通常用作因子中性化处理的基准？",
+    "options": ["A. 股票名称", "B. 市值和行业", "C. 交易日期", "D. 成交价格"],
+    "answer": 1,
+    "explanation": "市值中性化和行业中性化是最常用的两种中性化处理。市值中性化消除因子中的规模效应偏差，行业中性化消除因子中的行业偏向，从而得到更纯净的Alpha因子。"
+  },
+  {
+    "id": "ch18_ex05",
+    "section": "04",
+    "type": "multiple_choice",
+    "question": "评估因子质量时，最重要的单一指标是什么？",
+    "options": ["A. IC均值", "B. IC标准差", "C. IC信息比(ICIR)", "D. 因子换手率"],
+    "answer": 2,
+    "explanation": "IC信息比（ICIR = IC均值 / IC标准差）是评估因子质量的最重要单一指标。它同时衡量了因子的平均预测能力（IC均值）和预测稳定性（IC标准差的倒数）。ICIR > 0.5通常视为可用的因子。"
+  },
+  {
+    "id": "ch18_ex06",
+    "section": "04",
+    "type": "programming",
+    "question": "编写一个函数 evaluate_single_factor，评估一个因子的预测效果。输入：factor（因子值列表），forwardReturns（未来收益率列表）。返回：包含IC均值、IC胜率和ICIR的字典。提示：使用scipy.stats.spearmanr计算Rank IC（秩相关系数）。",
+    "answer": "import numpy as np\nfrom scipy.stats import spearmanr\n\ndef evaluate_single_factor(factor, forwardReturns):\n    ic, _ = spearmanr(factor, forwardReturns)\n    return {'IC': round(ic, 4), 'IC_sign': 'positive' if ic > 0 else 'negative', 'IC_strength': 'strong' if abs(ic) > 0.05 else ('moderate' if abs(ic) > 0.02 else 'weak')}",
+    "explanation": "Spearman秩相关系数可以衡量因子值排名与未来收益率排名之间的关系（即Rank IC）。IC > 0说明因子值越高未来收益越高（正向因子），IC < 0说明因子值越低未来收益越高（反向因子）。"
+  }
+]

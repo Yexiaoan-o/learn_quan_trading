@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}学习笔记 - 量化交易学习平台{% endblock %}
+
+{% block content %}
+<div class="notes-page">
+    <h1>&#x1F4DD; 学习笔记</h1>
+
+    {% if notes %}
+    <div class="notes-list">
+        {% for note in notes %}
+        <div class="note-card" id="note-{{ note.id }}">
+            <div class="note-header">
+                <span class="note-chapter">
+                    {% for phase in phases %}
+                        {% for ch in phase.chapters %}
+                            {% if ch.id == note.chapter_id %}
+                                {{ phase.phase_title }} / {{ ch.title }}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </span>
+                <span class="note-time">{{ note.created_at }}</span>
+                <button class="btn btn-sm btn-danger" onclick="deleteNote({{ note.id }})">&#x1F5D1;&#xFE0F; 删除</button>
+            </div>
+            <div class="note-content">{{ note.content }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">&#x1F4DD;</div>
+        <p>还没有学习笔记</p>
+        <p class="empty-hint">在章节学习中，你可以随时记录笔记。</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function deleteNote(id) {
+    if (!confirm('确定要删除这条笔记吗？')) return;
+    await fetch(`/api/notes/${id}`, {method: 'DELETE'});
+    document.getElementById('note-' + id).remove();
+}
+</script>
+{% endblock %}
