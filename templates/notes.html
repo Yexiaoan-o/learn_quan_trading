@@ -5,43 +5,119 @@
 <div class="notes-page">
     <h1>&#x1F4DD; 学习笔记</h1>
 
-    {% if notes %}
-    <div class="notes-list">
-        {% for note in notes %}
-        <div class="note-card" id="note-{{ note.id }}">
-            <div class="note-header">
-                <span class="note-chapter">
-                    {% for phase in phases %}
-                        {% for ch in phase.chapters %}
-                            {% if ch.id == note.chapter_id %}
-                                {{ phase.phase_title }} / {{ ch.title }}
-                            {% endif %}
+    <div class="notes-switcher">
+        <button class="notes-switcher-btn active" data-notes-tab="notes-list-panel">普通笔记</button>
+        <button class="notes-switcher-btn" data-notes-tab="annotations-list-panel">划词评论</button>
+    </div>
+
+    <div id="notes-list-panel" class="notes-tab-panel">
+        {% if notes %}
+        <div class="notes-list">
+            {% for note in notes %}
+            <div class="note-card" id="note-{{ note.id }}">
+                <div class="note-header">
+                    <span class="note-chapter">
+                        {% for phase in phases %}
+                            {% for ch in phase.chapters %}
+                                {% if ch.id == note.chapter_id %}
+                                    {{ phase.phase_title }} / {{ ch.title }}
+                                {% endif %}
+                            {% endfor %}
                         {% endfor %}
-                    {% endfor %}
-                </span>
-                <span class="note-time">{{ note.created_at }}</span>
-                <button class="btn btn-sm btn-danger" onclick="deleteNote({{ note.id }})">&#x1F5D1;&#xFE0F; 删除</button>
+                    </span>
+                    <span class="note-time">{{ note.created_at }}</span>
+                    <button class="btn btn-sm btn-danger" onclick="deleteNote({{ note.id }})">删除</button>
+                </div>
+                <div class="note-content">{{ note.content }}</div>
             </div>
-            <div class="note-content">{{ note.content }}</div>
+            {% endfor %}
         </div>
-        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">&#x1F4DD;</div>
+            <p>还没有学习笔记</p>
+            <p class="empty-hint">在章节学习中，你可以随时记录笔记。</p>
+        </div>
+        {% endif %}
     </div>
-    {% else %}
-    <div class="empty-state">
-        <div class="empty-icon">&#x1F4DD;</div>
-        <p>还没有学习笔记</p>
-        <p class="empty-hint">在章节学习中，你可以随时记录笔记。</p>
+
+    <div id="annotations-list-panel" class="notes-tab-panel hidden">
+        {% if annotations %}
+        <div class="notes-list">
+            {% for ann in annotations %}
+            <div class="note-card annotation-note-card" id="annotation-{{ ann.id }}">
+                <div class="note-header">
+                    <span class="note-chapter">
+                        {% for phase in phases %}
+                            {% for ch in phase.chapters %}
+                                {% if ch.id == ann.chapter_id %}
+                                    {{ phase.phase_title }} / {{ ch.title }}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </span>
+                    <span class="note-time">{{ ann.created_at }}</span>
+                    <button class="btn btn-sm btn-danger" onclick="deleteAnnotation({{ ann.id }})">删除</button>
+                </div>
+                <div class="annotation-quote-box">{{ ann.selected_text }}</div>
+                <div class="note-content">{{ ann.comment or '未填写评论' }}</div>
+                <div class="annotation-actions">
+                    <button class="btn btn-sm btn-primary" onclick="askAnnotationAI({{ ann.id }}, {{ ann.selected_text|tojson }}, {{ (ann.comment or '请解释这段内容')|tojson }})">问 AI</button>
+                </div>
+                {% if ann.ai_answer %}
+                <div class="annotation-ai-answer markdown-body">{{ ann.ai_answer }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">&#x1F4AC;</div>
+            <p>还没有划词评论</p>
+            <p class="empty-hint">在课程页面选中文字后可以添加评论。</p>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
+document.querySelectorAll('[data-notes-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-notes-tab]').forEach(x => x.classList.remove('active'))
+        document.querySelectorAll('.notes-tab-panel').forEach(x => x.classList.add('hidden'))
+        btn.classList.add('active')
+        document.getElementById(btn.dataset.notesTab).classList.remove('hidden')
+    })
+})
+
 async function deleteNote(id) {
-    if (!confirm('确定要删除这条笔记吗？')) return;
-    await fetch(`/api/notes/${id}`, {method: 'DELETE'});
-    document.getElementById('note-' + id).remove();
+    if (!confirm('确定要删除这条笔记吗？')) return
+    await fetch(`/api/notes/${id}`, {method: 'DELETE'})
+    const el = document.getElementById('note-' + id)
+    if (el) el.remove()
+}
+
+async function deleteAnnotation(id) {
+    if (!confirm('确定要删除这条评论吗？')) return
+    await fetch(`/api/annotations/${id}`, {method: 'DELETE'})
+    const el = document.getElementById('annotation-' + id)
+    if (el) el.remove()
+}
+
+async function askAnnotationAI(annotationId, selectedText, question) {
+    const resp = await fetch('/api/ai/ask', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({annotation_id: annotationId, selected_text: selectedText, question})
+    })
+    const data = await resp.json()
+    if (data.error) {
+        window.appFlash(data.error, true)
+        return
+    }
+    window.openAiAnswerModal(data.answer)
 }
 </script>
 {% endblock %}

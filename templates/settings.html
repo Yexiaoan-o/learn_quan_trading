@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}模型设置 - 量化交易学习平台{% endblock %}
+
+{% block content %}
+<div class="settings-page">
+    <h1>&#x2699; 模型设置</h1>
+    <div class="settings-card">
+        <div class="settings-desc">
+            在这里配置 AI 大模型的 API Key、模型名称和 API Base。配置后，课程中的划词评论可直接发送给模型获取解答。
+        </div>
+        <div class="settings-form-grid">
+            <div class="settings-form-group">
+                <label for="api-key">API Key</label>
+                <input id="api-key" class="settings-input" type="password" value="{{ settings.get('api_key', '') }}" placeholder="请输入 API Key">
+            </div>
+            <div class="settings-form-group">
+                <label for="model-name">模型名称</label>
+                <input id="model-name" class="settings-input" type="text" value="{{ settings.get('model_name', '') }}" placeholder="例如 deepseek-chat / gpt-4o-mini">
+            </div>
+            <div class="settings-form-group">
+                <label for="api-base">API Base</label>
+                <input id="api-base" class="settings-input" type="text" value="{{ settings.get('api_base', 'https://api.openai.com/v1') }}" placeholder="https://api.openai.com/v1">
+            </div>
+        </div>
+        <div class="settings-actions">
+            <button class="btn btn-primary" id="save-settings-btn">保存设置</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('save-settings-btn').addEventListener('click', async () => {
+    const api_key = document.getElementById('api-key').value.trim()
+    const model_name = document.getElementById('model-name').value.trim()
+    const api_base = document.getElementById('api-base').value.trim()
+
+    const resp = await fetch('/api/settings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({api_key, model_name, api_base})
+    })
+    const data = await resp.json()
+    if (data.status === 'ok') {
+        window.appFlash('设置已保存')
+    } else {
+        window.appFlash('保存失败', true)
+    }
+})
+</script>
+{% endblock %}

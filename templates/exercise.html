@@ -12,9 +12,12 @@
     <div class="exercise-header">
         <h1>{{ chapter.title }} - 习题练习</h1>
         <div class="exercise-progress" id="exProgress">
-            <span>已完成: <strong id="doneCount">0</strong>/{{ exercises|length }}</span>
-            <span>得分: <strong id="totalScore">0</strong>/{{ exercises|length * 10 }}</span>
+            <span>已提交: <strong id="doneCount">0</strong>/{{ exercises|length }}</span>
+            <span>总得分: <strong id="totalScore">0</strong>/{{ exercises|length * 10 }}</span>
             <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        </div>
+        <div class="exercise-toolbar">
+            <button class="btn btn-primary" id="submit-all-btn">一键提交所有答案</button>
         </div>
     </div>
 
@@ -23,7 +26,7 @@
         {% set etype_label = {'multiple_choice': '选择题', 'true_false': '判断题', 'code_fill': '填空题', 'programming': '编程题'}.get(ex.type, ex.type) %}
         {% set etype_icon = {'multiple_choice': '&#x1F4CB;', 'true_false': '&#x2705;/&#x274C;', 'code_fill': '&#x1F58A;&#xFE0F;', 'programming': '&#x1F4BB;'}.get(ex.type, '&#x2753;') %}
 
-        <div class="exercise-card" id="ex-{{ ex.id }}" data-ex-id="{{ ex.id }}">
+        <div class="exercise-card" id="ex-{{ ex.id }}" data-ex-id="{{ ex.id }}" data-ex-type="{{ ex.type }}" data-answer='{{ ex.answer | tojson }}'>
             <div class="ex-header">
                 <span class="ex-number">{{ loop.index }}</span>
                 <span class="ex-type" title="{{ etype_label }}">{{ etype_icon }} {{ etype_label }}</span>
@@ -39,12 +42,11 @@
 
             <div class="ex-question markdown-body">{{ ex.question | safe }}</div>
 
-            <!-- Multiple Choice -->
             {% if ex.type == 'multiple_choice' %}
             <div class="ex-options">
                 {% for opt in ex.options %}
                 <label class="ex-option" id="opt-{{ ex.id }}-{{ loop.index0 }}">
-                    <input type="radio" name="answer-{{ ex.id }}" value="{{ loop.index0 }}" onchange="enableSubmit('{{ ex.id }}')">
+                    <input type="radio" name="answer-{{ ex.id }}" value="{{ loop.index0 }}">
                     <span class="opt-marker">{{ ['A','B','C','D','E','F'][loop.index0] }}</span>
                     <span class="opt-text">{{ opt }}</span>
                 </label>
@@ -52,140 +54,133 @@
             </div>
             {% endif %}
 
-            <!-- True/False -->
             {% if ex.type == 'true_false' %}
             <div class="ex-options">
                 <label class="ex-option">
-                    <input type="radio" name="answer-{{ ex.id }}" value="true" onchange="enableSubmit('{{ ex.id }}')">
+                    <input type="radio" name="answer-{{ ex.id }}" value="true">
                     <span class="opt-marker">&#x2705;</span>
                     <span class="opt-text">正确</span>
                 </label>
                 <label class="ex-option">
-                    <input type="radio" name="answer-{{ ex.id }}" value="false" onchange="enableSubmit('{{ ex.id }}')">
+                    <input type="radio" name="answer-{{ ex.id }}" value="false">
                     <span class="opt-marker">&#x274C;</span>
                     <span class="opt-text">错误</span>
                 </label>
             </div>
             {% endif %}
 
-            <!-- Code Fill -->
             {% if ex.type == 'code_fill' %}
             <div class="ex-code-fill">
                 <textarea class="code-input" id="codeInput-{{ ex.id }}" placeholder="请输入代码...">{{ history_map.get(ex.id, {}).get('user_answer', '') }}</textarea>
             </div>
             {% endif %}
 
-            <!-- Programming -->
             {% if ex.type == 'programming' %}
             <div class="ex-code-fill">
-                <textarea class="code-input code-input-lg" id="codeInput-{{ ex.id }}" placeholder="请输入代码...">{{ history_map.get(ex.id, {}).get('user_answer', '') }}</textarea>
+                <textarea class="code-input code-input-lg" id="codeInput-{{ ex.id }}" placeholder="请输入完整代码...">{{ history_map.get(ex.id, {}).get('user_answer', '') }}</textarea>
             </div>
             {% endif %}
 
-            <!-- Submit Button & Feedback -->
-            <div class="ex-action">
-                <button class="btn btn-primary btn-submit" id="submitBtn-{{ ex.id }}" onclick="submitAnswer('{{ chapter.id }}', '{{ ex.id }}')">&#x2728; 提交答案</button>
-            </div>
             <div class="ex-feedback" id="feedback-{{ ex.id }}" style="display:none"></div>
         </div>
         {% endfor %}
     </div>
 </div>
 
-<!-- Flashes -->
 <div class="flash-msg hidden" id="flashMsg"><span id="flashText"></span></div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-var doneCount = 0;
-var totalScore = 0;
-
-// Initialize: count already-answered exercises
-document.querySelectorAll('.ex-history').forEach(el => {
-    const card = el.closest('.exercise-card');
-    const exId = card.dataset.exId;
-    const isCorrect = el.textContent.includes('已答对');
-    fetch(`/api/exercises/{{ chapter.id }}/history`)
-        .then(r => r.json())
-        .then(history => {
-            const h = history.find(h => h.exercise_id === exId);
-            if (h && h.correct) {
-                doneCount++;
-                totalScore += h.score;
-                updateProgress();
-                const fb = document.getElementById('feedback-' + exId);
-                fb.innerHTML = '<div class="fb-correct">&#x2705; ' + (h.correct ? '回答正确' : '回答错误') + ' (' + h.score + '分)</div>';
-                fb.style.display = 'block';
-            }
-        });
-});
-
-function enableSubmit(exId) {
-    document.getElementById('submitBtn-' + exId).disabled = false;
-}
+let doneCount = 0
+let totalScore = 0
 
 function updateProgress() {
-    const total = {{ exercises|length }};
-    document.getElementById('doneCount').textContent = doneCount;
-    document.getElementById('totalScore').textContent = totalScore;
-    document.getElementById('progressFill').style.width = (total > 0 ? doneCount / total * 100 : 0) + '%';
-}
-
-async function submitAnswer(chapterId, exId) {
-    let answer = '';
-    const card = document.getElementById('ex-' + exId);
-    const exType = card.querySelector('.ex-type').textContent.trim();
-
-    if (exType.includes('选择') || exType.includes('判断')) {
-        const selected = document.querySelector(`input[name="answer-${exId}"]:checked`);
-        if (!selected) {
-            showFlash('请先选择一个答案');
-            return;
-        }
-        answer = selected.value;
-    } else {
-        const textarea = document.getElementById('codeInput-' + exId);
-        if (!textarea.value.trim()) {
-            showFlash('请输入代码');
-            return;
-        }
-        answer = textarea.value;
-    }
-
-    const resp = await fetch(`/api/exercise/${chapterId}/${exId}`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({answer: answer})
-    });
-    const data = await resp.json();
-
-    const feedback = document.getElementById('feedback-' + exId);
-    feedback.style.display = 'block';
-
-    if (data.correct) {
-        feedback.innerHTML = `<div class="fb-correct">&#x2705; 回答正确！得分: ${data.score}</div>`;
-        if (!document.getElementById('ex-' + exId).querySelector('.ex-history')?.textContent.includes('已答对')) {
-            doneCount++;
-            totalScore += data.score;
-        }
-    } else {
-        feedback.innerHTML = `<div class="fb-incorrect">&#x274C; ${data.feedback}</div>`;
-    }
-
-    if (data.explanation) {
-        feedback.innerHTML += `<div class="fb-explanation"><strong>&#x1F4A1; 解析：</strong>${data.explanation}</div>`;
-    }
-
-    updateProgress();
-    feedback.scrollIntoView({behavior: 'smooth', block: 'center'});
+    const total = {{ exercises|length }}
+    document.getElementById('doneCount').textContent = doneCount
+    document.getElementById('totalScore').textContent = totalScore
+    document.getElementById('progressFill').style.width = (total > 0 ? doneCount / total * 100 : 0) + '%'
 }
 
 function showFlash(msg) {
-    const el = document.getElementById('flashMsg');
-    document.getElementById('flashText').textContent = msg;
-    el.classList.remove('hidden');
-    setTimeout(() => el.classList.add('hidden'), 2500);
+    const el = document.getElementById('flashMsg')
+    document.getElementById('flashText').textContent = msg
+    el.classList.remove('hidden')
+    setTimeout(() => el.classList.add('hidden'), 2500)
 }
+
+function getExerciseAnswer(card) {
+    const exId = card.dataset.exId
+    const type = card.dataset.exType
+    if (type === 'multiple_choice' || type === 'true_false') {
+        const selected = document.querySelector(`input[name="answer-${exId}"]:checked`)
+        return selected ? selected.value : ''
+    }
+    const textarea = document.getElementById('codeInput-' + exId)
+    return textarea ? textarea.value.trim() : ''
+}
+
+async function submitAllAnswers() {
+    const cards = Array.from(document.querySelectorAll('.exercise-card'))
+    let submittedAny = false
+    doneCount = 0
+    totalScore = 0
+
+    for (const card of cards) {
+        const exId = card.dataset.exId
+        const type = card.dataset.exType
+        const answer = getExerciseAnswer(card)
+        const feedback = document.getElementById('feedback-' + exId)
+
+        if (!answer) {
+            feedback.style.display = 'block'
+            feedback.innerHTML = '<div class="fb-incorrect">请先填写本题答案</div>'
+            continue
+        }
+
+        submittedAny = true
+        const resp = await fetch(`/api/exercise/{{ chapter.id }}/${exId}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({answer})
+        })
+        const data = await resp.json()
+
+        feedback.style.display = 'block'
+        if (data.correct) {
+            feedback.innerHTML = `<div class="fb-correct">&#x2705; 回答正确！得分: ${data.score}</div>`
+        } else {
+            feedback.innerHTML = `<div class="fb-incorrect">&#x274C; ${data.feedback}</div>`
+        }
+
+        if (data.explanation) {
+            feedback.innerHTML += `<div class="fb-explanation"><strong>&#x1F4A1; 解析：</strong>${data.explanation}</div>`
+        }
+
+        if ((type === 'programming' || type === 'code_fill') && data.answer !== undefined && data.answer !== null) {
+            const code = Array.isArray(data.answer) ? data.answer.join('\n') : String(data.answer)
+            feedback.innerHTML += `<div class="fb-reference"><strong>参考代码：</strong><pre><code>${escapeHtml(code)}</code></pre></div>`
+        }
+
+        doneCount += 1
+        totalScore += Number(data.score || 0)
+    }
+
+    if (!submittedAny) {
+        showFlash('请先至少回答一道题')
+        return
+    }
+
+    updateProgress()
+    window.scrollTo({top: 0, behavior: 'smooth'})
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
+}
+
+document.getElementById('submit-all-btn').addEventListener('click', submitAllAnswers)
 </script>
 {% endblock %}

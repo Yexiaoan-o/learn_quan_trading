@@ -61,6 +61,22 @@ def init_db():
             seconds INTEGER DEFAULT 0,
             UNIQUE(chapter_id, date)
         );
+
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS annotations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            chapter_id TEXT NOT NULL,
+            section_id TEXT NOT NULL,
+            selected_text TEXT NOT NULL,
+            comment TEXT,
+            ai_answer TEXT,
+            created_at TEXT DEFAULT (datetime('now','localtime')),
+            updated_at TEXT DEFAULT (datetime('now','localtime'))
+        );
     """)
     conn.commit()
     conn.close()

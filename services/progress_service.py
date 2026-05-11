@@ -190,3 +190,87 @@ def record_learning_time(chapter_id, seconds):
         conn.commit()
     finally:
         conn.close()
+
+
+def get_setting(key):
+    conn = get_db()
+    try:
+        row = conn.execute(
+            "SELECT value FROM settings WHERE key = ?",
+            (key,)
+        ).fetchone()
+        return row["value"] if row else None
+    finally:
+        conn.close()
+
+
+def get_settings():
+    conn = get_db()
+    try:
+        rows = conn.execute("SELECT key, value FROM settings").fetchall()
+        return {row["key"]: row["value"] for row in rows}
+    finally:
+        conn.close()
+
+
+def save_settings(settings_dict):
+    conn = get_db()
+    try:
+        for key, value in settings_dict.items():
+            conn.execute(
+                "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+                (key, value)
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def save_annotation(chapter_id, section_id, selected_text, comment):
+    conn = get_db()
+    try:
+        conn.execute("""
+            INSERT INTO annotations (chapter_id, section_id, selected_text, comment, created_at, updated_at)
+            VALUES (?, ?, ?, ?, datetime('now','localtime'), datetime('now','localtime'))
+        """, (chapter_id, section_id, selected_text, comment))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def get_annotations(chapter_id=None):
+    conn = get_db()
+    try:
+        if chapter_id:
+            rows = conn.execute(
+                "SELECT * FROM annotations WHERE chapter_id = ? ORDER BY updated_at DESC, id DESC",
+                (chapter_id,)
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM annotations ORDER BY updated_at DESC, id DESC"
+            ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def delete_annotation(annotation_id):
+    conn = get_db()
+    try:
+        conn.execute("DELETE FROM annotations WHERE id = ?", (annotation_id,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def save_annotation_ai_answer(annotation_id, ai_answer):
+    conn = get_db()
+    try:
+        conn.execute(
+            "UPDATE annotations SET ai_answer = ?, updated_at = datetime('now','localtime') WHERE id = ?",
+            (ai_answer, annotation_id)
+        )
+        conn.commit()
+    finally:
+        conn.close()

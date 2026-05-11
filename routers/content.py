@@ -1,7 +1,12 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from services import content_service
-from services.progress_service import get_chapter_progress, get_bookmarks, get_overall_stats, get_last_position
+from services.progress_service import (
+    get_chapter_progress,
+    get_bookmarks,
+    get_overall_stats,
+    get_last_position,
+)
 
 router = APIRouter()
 

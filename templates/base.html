@@ -9,7 +9,6 @@
 </head>
 <body>
     <div class="app-layout">
-        <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <a href="/" class="logo">
@@ -28,13 +27,16 @@
                     <a href="/notes" class="nav-item {% if request.url.path == '/notes' %}active{% endif %}">
                         <span class="nav-icon">&#x1F4DD;</span> 学习笔记
                     </a>
+                    <a href="/settings" class="nav-item {% if request.url.path == '/settings' %}active{% endif %}">
+                        <span class="nav-icon">&#x2699;</span> 模型设置
+                    </a>
                 </div>
                 <div class="nav-section">
                     <div class="nav-section-title">课程目录</div>
                     {% for phase in phases %}
-                    <div class="nav-phase">
+                    <div class="nav-phase expanded">
                         <div class="nav-phase-title" onclick="togglePhase(this)">
-                            <span class="phase-toggle">&#x25B6;</span>
+                            <span class="phase-toggle">&#x25BC;</span>
                             {{ phase.phase_title }}
                         </div>
                         <div class="nav-phase-chapters">
@@ -51,9 +53,7 @@
             </nav>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Top Bar -->
             <header class="top-bar">
                 <button class="sidebar-toggle" onclick="toggleSidebar()" title="切换侧边栏">&#x2630;</button>
                 <div class="top-bar-search">
@@ -69,11 +69,45 @@
                 </div>
             </header>
 
-            <!-- Content Area -->
-            <div class="content-area">
+            <div class="content-area {% block content_area_class %}{% endblock %}">
                 {% block content %}{% endblock %}
             </div>
         </main>
+    </div>
+
+    <div class="selection-popover hidden" id="selection-popover">
+        <button class="btn btn-sm btn-primary" id="selection-comment-btn">添加评论</button>
+    </div>
+
+    <div class="modal hidden" id="annotation-modal">
+        <div class="modal-backdrop" data-close-modal="annotation-modal"></div>
+        <div class="modal-dialog">
+            <div class="modal-header-row">
+                <h3>划词评论</h3>
+                <button class="modal-close" data-close-modal="annotation-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="annotation-preview" id="annotation-selected-text"></div>
+                <textarea id="annotation-comment-input" class="note-input" placeholder="输入你的问题或评论"></textarea>
+                <div class="modal-actions-row">
+                    <button class="btn btn-outline" id="annotation-save-btn">保存评论</button>
+                    <button class="btn btn-primary" id="annotation-ask-btn">发送给 AI</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal hidden" id="ai-answer-modal">
+        <div class="modal-backdrop" data-close-modal="ai-answer-modal"></div>
+        <div class="modal-dialog modal-dialog-wide">
+            <div class="modal-header-row">
+                <h3>AI 回答</h3>
+                <button class="modal-close" data-close-modal="ai-answer-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="ai-answer-box markdown-body" id="ai-answer-content"></div>
+            </div>
+        </div>
     </div>
 
     <script src="/static/js/app.js"></script>
