@@ -28,8 +28,8 @@ price_matrix = np.array([
     [10.0, 10.5, 10.3, 11.0, 10.8],  # 股票A
     [25.0, 24.5, 25.2, 26.0, 25.8],  # 股票B
     [50.0, 51.0, 50.5, 52.0, 51.5],  # 股票C
-    ...
 ])
+print(price_matrix)
 print(price_matrix.shape)  # (3, 5)  = 3只股票 × 5天
 
 # === 特殊数组创建 ===
@@ -38,19 +38,29 @@ ones_arr = np.ones((3, 4))      # 全一数组 3行×4列
 arrange_arr = np.arange(0, 1, 0.1)  # 等差数列 [0. 0.1 ... 0.9]
 linspace_arr = np.linspace(0, 1, 11) # 等间距 [0. 0.1 ... 1.0]
 random_arr = np.random.randn(252)    # 标准正态分布 252个值
+
+print("全零数组: " + str(zeros_arr))  # [0. 0. 0. 0. 0.]
+print("全一数组: " + str(ones_arr))  # [[1. 1. 1. 1.]
+                                     #  [1. 1. 1. 1.]
+                                     #  [1. 1. 1. 1.]]
+print("等差数列: " + str(arrange_arr))  # [0. 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9]
+print("等间距数列: " + str(linspace_arr))  # [0. 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1. ]
+print("随机数组: " + str(random_arr))  # 标准正态分布 252个值
 ```
 
 ### 数组的基本属性
 
 ```python
+import numpy as np
 arr = np.array([[1, 2, 3], [4, 5, 6]])
 
-print(arr.ndim)    # 2  —— 维度数（2维）
-print(arr.shape)   # (2, 3) —— 形状（2行3列）
-print(arr.size)    # 6  —— 总元素数
-print(arr.dtype)   # int64 —— 数据类型
-print(arr.itemsize) # 8  —— 每个元素的字节数
-print(arr.nbytes)  # 48 —— 总字节数
+print("数组内容:\n" + str(arr))  # [[1 2 3] [4 5 6]]
+print("维度数: " + str(arr.ndim))    # 2  —— 维度数（2维）
+print("形状: " + str(arr.shape))   # (2, 3) —— 形状（2行3列）
+print("总元素数: " + str(arr.size))    # 6  —— 总元素数
+print("数据类型: " + str(arr.dtype))   # int64 —— 数据类型
+print("每个元素的字节数: " + str(arr.itemsize)) # 8  —— 每个元素的字节数
+print("总字节数: " + str(arr.nbytes))  # 48 —— 总字节数
 ```
 
 ## 1.3 NumPy 核心运算
@@ -63,21 +73,29 @@ import numpy as np
 # 假设有两只股票5天的收盘价
 stock_a = np.array([100, 101, 102, 103, 104])
 stock_b = np.array([50, 51, 49, 52, 50])
+print("股票A价格: " + str(stock_a))  # [100 101 102 103 104]
+print("股票B价格: " + str(stock_b))  # [50 51 49 52 50]
 
 # === 逐元素运算（向量化） ===
-sum_prices = stock_a + stock_b       # [150, 152, 151, 155, 154]
-diff_prices = stock_a - stock_b      # [50, 50, 53, 51, 54]
-ratio = stock_a / stock_b            # [2.0, 1.98, 2.08, 1.98, 2.08]
+sum_prices = stock_a + stock_b       
+diff_prices = stock_a - stock_b      
+ratio = stock_a / stock_b
+print("价格之和: " + str(sum_prices))  # [150 152 151 155 154]
+print("价格之差: " + str(diff_prices))  # [50 50 53 51 54]
+print("价格之比: " + str(ratio))       # [2. 1.98 2.08 1.98 2.08]   
 
 # === 数学函数运算 ===
 log_price = np.log(stock_a)          # 对数变换
 sqrt_price = np.sqrt(stock_a)        # 开方
 exp_price = np.exp(stock_a)          # 指数变换
+print("价格的对数: " + str(log_price))  # [4.60517019 4.61512052 4.62497281 4.63472899 4.6443909 ]
+print("价格的开方: " + str(sqrt_price))  # [10. 10.04987562 10.09950494 10.14889157 10.19803903]
+print("价格的指数: " + str(exp_price))  # [2.68811714e+43 2.71828183e+43 2.78946809e+43 2.86095825e+43 2.93364411e+43]
 
 # === 条件筛选（布尔索引） ===
 # 找出stock_a中价格大于102的日期
 condition = stock_a > 102
-print(stock_a[condition])            # [103, 104]
+print(stock_a[condition])            # [103 104]
 
 # 复杂条件
 condition = (stock_a > 101) & (stock_b < 51)
@@ -87,7 +105,10 @@ print(np.where(condition))           # 返回满足条件的索引
 ### 关键的统计运算
 
 ```python
+import numpy as np
+
 returns = np.array([0.01, -0.02, 0.03, -0.01, 0.02, 0.01, -0.005])
+print(f'收益率数组: {returns}')  # [ 0.01  -0.02   0.03  -0.01   0.02   0.01  -0.005]
 
 # === 基础统计 ===
 print(f'均值: {np.mean(returns):.4f}')        # 日均收益率
