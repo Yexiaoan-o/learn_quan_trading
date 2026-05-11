@@ -29,7 +29,7 @@ async def exercise_page(request: Request, chapter_id: str):
     history = progress_service.get_exercise_history(chapter_id)
     history_map = {h["exercise_id"]: h for h in history}
 
-    return request.app.state.templates.TemplateResponse("exercise.html", {
+    return request.app.state.templates.TemplateResponse(request=request, name="exercise.html", context={
         "request": request,
         "phase": phase_info,
         "chapter": chapter_info,

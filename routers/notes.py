@@ -38,7 +38,7 @@ async def notes_page(request: Request):
     notes = progress_service.get_notes()
     annotations = progress_service.get_annotations()
     phases = content_service.get_all_phases()
-    return request.app.state.templates.TemplateResponse("notes.html", {
+    return request.app.state.templates.TemplateResponse(request=request, name="notes.html", context={
         "request": request,
         "phases": phases,
         "notes": notes,
@@ -50,7 +50,7 @@ async def notes_page(request: Request):
 async def settings_page(request: Request):
     phases = content_service.get_all_phases()
     settings = progress_service.get_settings()
-    return request.app.state.templates.TemplateResponse("settings.html", {
+    return request.app.state.templates.TemplateResponse(request=request, name="settings.html", context={
         "request": request,
         "phases": phases,
         "settings": settings

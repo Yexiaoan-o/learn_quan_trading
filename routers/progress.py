@@ -54,7 +54,7 @@ async def progress_page(request: Request):
             "exercise_pct": round(completed_exercises / total_exercises * 100) if total_exercises > 0 else 0
         })
 
-    return request.app.state.templates.TemplateResponse("progress.html", {
+    return request.app.state.templates.TemplateResponse(request=request, name="progress.html", context={
         "request": request,
         "phases": phases,
         "stats": stats,

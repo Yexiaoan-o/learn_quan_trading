@@ -17,7 +17,7 @@ async def index(request: Request):
     last_pos = get_last_position()
     bookmarks = get_bookmarks()
     phases = content_service.get_all_phases()
-    return request.app.state.templates.TemplateResponse("index.html", {
+    return request.app.state.templates.TemplateResponse(request=request,name="index.html", context={
         "request": request,
         "phases": phases,
         "stats": stats,
@@ -48,7 +48,7 @@ async def chapter(request: Request, chapter_id: str):
             "bookmarked": s["filename"] in bookmarked_sections
         })
 
-    return request.app.state.templates.TemplateResponse("chapter.html", {
+    return request.app.state.templates.TemplateResponse(request=request, name="chapter.html", context={
         "request": request,
         "phase": phase_info,
         "chapter": chapter_info,
